@@ -1,0 +1,35 @@
+name: build-exe
+
+# Собирает TelegraphParser.exe на Windows-раннере и кладёт его в артефакты.
+# Запуск: вручную (Actions -> build-exe -> Run workflow) или на пуш этой ветки.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/telegraph-keyword-parser-1p22wm
+    paths:
+      - telegraph_parser.py
+      - .github/workflows/build-exe.yml
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: python -m pip install --upgrade pip pyinstaller requests beautifulsoup4
+
+      - name: Build exe
+        run: python -m PyInstaller --onefile --console --name TelegraphParser telegraph_parser.py
+
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: TelegraphParser-windows
+          path: dist/TelegraphParser.exe
+          if-no-files-found: error

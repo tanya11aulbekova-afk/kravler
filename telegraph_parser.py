@@ -10,7 +10,7 @@ Telegraph Parser — вытаскивает инфу из статей telegra.p
   * crawl    — обойти telegra.ph по ссылкам внутри статей (BFS) и нарастить базу
   * search   — искать по словам/фразам/regex, режимы OR/AND, выдаёт КОНТЕКСТНЫЕ сниппеты
   * extract  — доставать "символы" по готовым или своим regex-шаблонам (email, @ник, t.me, wallet, code...)
-  * menu     — интерактивное меню (как в старой версии), если лень вспоминать команды
+  * menu     — интерактивное меню (запуск без аргументов / двойной клик по .exe)
 
 Работает и как CLI (можно скриптовать), и как меню.
 Прокси (опционально) — HTTP-прокси из proxies.txt, по одному на строку.
@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 import csv
 import json
 import time
@@ -39,14 +40,27 @@ except Exception:
     HAVE_BS4 = False
 
 
-# ------------------------------- файлы ------------------------------------- #
-DB_FILE = "articles_db.json"
-SEED_FILE = "urls_seed.txt"
-KEYWORDS_FILE = "keywords.txt"
-PATTERNS_FILE = "patterns.txt"
-PROXIES_FILE = "proxies.txt"
-RESULTS_CSV = "results.csv"
-EXTRACT_CSV = "extracted.csv"
+# --------------------- где живут файлы (рядом с .exe/скриптом) -------------- #
+def _app_dir() -> str:
+    if getattr(sys, "frozen", False):          # собрано в exe через PyInstaller
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+APP_DIR = _app_dir()
+
+
+def _p(name: str) -> str:
+    return os.path.join(APP_DIR, name)
+
+
+DB_FILE = _p("articles_db.json")
+SEED_FILE = _p("urls_seed.txt")
+KEYWORDS_FILE = _p("keywords.txt")
+PATTERNS_FILE = _p("patterns.txt")
+PROXIES_FILE = _p("proxies.txt")
+RESULTS_CSV = _p("results.csv")
+EXTRACT_CSV = _p("extracted.csv")
 
 # ------------------------------- настройки --------------------------------- #
 TIMEOUT = 25
@@ -78,6 +92,73 @@ BUILTIN_PATTERNS: Dict[str, str] = {
     "code":     r"\b[A-Z0-9]{3,}(?:-[A-Z0-9]{3,})+\b",           # ключи/промокоды типа XXXX-XXXX
     "hashtag":  r"(?<!\w)#[A-Za-z0-9_Ѐ-ӿ]{2,}",
 }
+
+
+# ============================= КРАСОТА (UI) ================================= #
+class C:
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    DIM = "\033[2m"
+    RED = "\033[91m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    MAGENTA = "\033[95m"
+    CYAN = "\033[96m"
+    GRAY = "\033[90m"
+
+
+USE_COLOR = True
+
+
+def _init_color() -> None:
+    """Включает ANSI-цвета (в т.ч. на Windows) и отключает их, если вывод не в консоль."""
+    global USE_COLOR
+    if os.environ.get("NO_COLOR") or not sys.stdout.isatty():
+        USE_COLOR = False
+    if os.name == "nt":
+        try:
+            import ctypes
+            k = ctypes.windll.kernel32
+            k.SetConsoleMode(k.GetStdHandle(-11), 7)   # ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        except Exception:
+            USE_COLOR = False
+
+
+def c(text: str, *codes: str) -> str:
+    if not USE_COLOR or not codes:
+        return text
+    return "".join(codes) + text + C.RESET
+
+
+def banner() -> None:
+    line = "═" * 46
+    print()
+    print(c("  ╔" + line + "╗", C.CYAN))
+    print(c("  ║", C.CYAN) + c("           T E L E G R A P H   P A R S E R", C.BOLD, C.CYAN)
+          + c("    ║", C.CYAN))
+    print(c("  ╚" + line + "╝", C.CYAN))
+    print(c("    поиск и извлечение инфы из telegra.ph", C.GRAY))
+
+
+def section(title: str) -> None:
+    print("\n" + c("▎", C.CYAN) + c(f" {title}", C.BOLD))
+
+
+def ok(msg: str) -> None:
+    print(c("  ✓ ", C.GREEN) + msg)
+
+
+def warn(msg: str) -> None:
+    print(c("  ! ", C.YELLOW) + msg)
+
+
+def err(msg: str) -> None:
+    print(c("  ✗ ", C.RED) + msg)
+
+
+def info(msg: str) -> None:
+    print(c("  · ", C.GRAY) + msg)
 
 
 # ------------------------------- утилиты ----------------------------------- #
@@ -128,6 +209,42 @@ def read_lines(path: str) -> List[str]:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
 
+# ------- дефолтные конфиги: создаются сами при первом запуске --------------- #
+DEFAULT_FILES: Dict[str, str] = {
+    KEYWORDS_FILE: (
+        "# Ключевые слова/фразы для команды search.\n"
+        "# MODE=OR  -> статья подходит, если найдено ХОТЯ БЫ одно слово\n"
+        "# MODE=AND -> статья подходит, только если найдены ВСЕ слова\n"
+        "MODE=OR\n"
+        "rust\n"
+        "steam\n"
+        "drops\n"
+    ),
+    PATTERNS_FILE: (
+        "# Свои regex-шаблоны для команды extract.\n"
+        "# Формат:  имя = регулярка       например:   promo = [A-Z]{3,}-\\d{4}-[A-Z]+\n"
+        "# Встроенные (через --type): email, tg, tme, url, phone, ip, btc, eth, trx, code, hashtag\n"
+        "# promo = [A-Z]{3,}-\\d{2,4}-[A-Z0-9]+\n"
+    ),
+    SEED_FILE: "# По одной telegra.ph ссылке на строку — стартовые статьи для add/crawl\n",
+    PROXIES_FILE: (
+        "# HTTP-прокси, по одному на строку (опционально)\n"
+        "# ip:port\n"
+        "# user:pass@ip:port\n"
+    ),
+}
+
+
+def ensure_files() -> None:
+    for path, content in DEFAULT_FILES.items():
+        if not os.path.exists(path):
+            try:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(content)
+            except Exception:
+                pass
+
+
 # ------------------------------- прокси ------------------------------------ #
 def read_proxies() -> List[str]:
     out: List[str] = []
@@ -163,7 +280,6 @@ class ProxyPool:
         return {"http": p, "https": p}, mask_proxy(p)
 
     def drop(self, proxy_label: str) -> None:
-        # убираем текущий прокси из живых, если он подвёл
         if self._current and mask_proxy(self._current) == proxy_label:
             try:
                 self.alive.remove(self._current)
@@ -185,7 +301,7 @@ def http_get(url: str, pool: ProxyPool, expect_json: bool = False):
         except Exception as e:
             last_err = e
             pool.drop(label)
-            print(f"  [retry {attempt}/{RETRIES}] {label} -> {e}")
+            info(f"retry {attempt}/{RETRIES} [{label}] {e}")
             time.sleep((attempt ** 2) * random.uniform(0.6, 1.4))
     raise last_err  # type: ignore
 
@@ -208,7 +324,6 @@ def _walk_nodes(nodes: Iterable, texts: List[str], links: List[str]) -> None:
         children = node.get("children")
         if children:
             _walk_nodes(children, texts, links)
-        # разбиваем на строки по блочным тегам
         if tag in ("p", "h1", "h2", "h3", "h4", "li", "blockquote", "figcaption", "br"):
             texts.append("\n")
 
@@ -293,7 +408,7 @@ def add_urls(urls: List[str], db: Dict[str, dict], pool: ProxyPool, force: bool 
     for u in urls:
         u = norm_url(u)
         if not is_telegra(u):
-            print(f"  [skip] не telegra.ph: {u}")
+            warn(f"не telegra.ph: {u}")
             continue
         if u in db and not force:
             continue
@@ -301,9 +416,9 @@ def add_urls(urls: List[str], db: Dict[str, dict], pool: ProxyPool, force: bool 
             title, text, _ = parse_article(u, pool)
             db[u] = {"title": title, "text": text}
             added += 1
-            print(f"  [+] {title[:70] or '(без заголовка)'}  ({u})")
+            ok(f"{c(title[:70] or '(без заголовка)', C.BOLD)}  {c(u, C.GRAY)}")
         except Exception as e:
-            print(f"  [fail] {u}: {e}")
+            err(f"{u}: {e}")
         jitter_sleep()
     return added
 
@@ -325,17 +440,17 @@ def crawl(seeds: List[str], db: Dict[str, dict], pool: ProxyPool, max_pages: int
             if url not in db:
                 db[url] = {"title": title, "text": text}
                 added += 1
-                print(f"  [crawl +] {title[:60] or '(no title)'}  ({url})")
+                ok(f"{c(title[:60] or '(no title)', C.BOLD)}  {c(url, C.GRAY)}")
             for lk in links:
                 if lk not in seen:
                     seen.add(lk)
                     queue.append(lk)
         except Exception as e:
-            print(f"  [crawl fail] {url}: {e}")
+            err(f"{url}: {e}")
         jitter_sleep()
         if visited % 25 == 0:
             save_db(db)
-            print(f"  [crawl] visited={visited} added={added} queue={len(queue)}")
+            info(f"visited={visited} added={added} queue={len(queue)}")
     return added
 
 
@@ -350,7 +465,6 @@ def read_keywords() -> Tuple[str, List[str]]:
                 mode = m
             continue
         words.append(line)
-    # убираем дубли, сохраняя порядок
     seen, out = set(), []
     for w in words:
         k = w.lower()
@@ -368,17 +482,24 @@ def build_matchers(terms: List[str], regex: bool, ignore_case: bool) -> List[Tup
         try:
             matchers.append((t, re.compile(pat, flags)))
         except re.error as e:
-            print(f"  [regex error] '{t}': {e}")
+            err(f"regex '{t}': {e}")
     return matchers
 
 
 def make_snippet(text: str, m: re.Match) -> str:
     start = max(0, m.start() - SNIPPET_RADIUS)
     end = min(len(text), m.end() + SNIPPET_RADIUS)
-    snippet = text[start:end].replace("\n", " ")
-    snippet = re.sub(r"\s+", " ", snippet).strip()
+    snippet = re.sub(r"\s+", " ", text[start:end].replace("\n", " ")).strip()
     prefix = "…" if start > 0 else ""
     suffix = "…" if end < len(text) else ""
+    matched = m.group(0).strip()
+    if USE_COLOR and matched:
+        try:
+            snippet = re.sub(re.escape(matched),
+                             lambda mm: c(mm.group(0), C.BOLD, C.YELLOW),
+                             snippet, flags=re.IGNORECASE)
+        except re.error:
+            pass
     return f"{prefix}{snippet}{suffix}"
 
 
@@ -397,9 +518,9 @@ def search_db(db: Dict[str, dict], terms: List[str], mode: str,
             if m:
                 hit_terms.add(term)
                 if len(snippets) < 5:
-                    snippets.append(f"[{term}] {make_snippet(content, m)}")
-        ok = (len(hit_terms) == len(matchers)) if mode == "AND" else bool(hit_terms)
-        if ok:
+                    snippets.append(f"{c('['+term+']', C.CYAN)} {make_snippet(content, m)}")
+        ok_match = (len(hit_terms) == len(matchers)) if mode == "AND" else bool(hit_terms)
+        if ok_match:
             results.append({
                 "url": url,
                 "title": item.get("title", ""),
@@ -417,13 +538,12 @@ def extract_db(db: Dict[str, dict], patterns: Dict[str, str], ignore_case: bool)
         try:
             compiled.append((name, re.compile(pat, flags)))
         except re.error as e:
-            print(f"  [regex error] '{name}': {e}")
+            err(f"regex '{name}': {e}")
     rows = []
     for url, item in db.items():
         content = (item.get("title", "") + "\n" + item.get("text", ""))
         for name, pat in compiled:
-            found = []
-            seen = set()
+            found, seen = [], set()
             for m in pat.finditer(content):
                 val = m.group(0).strip()
                 if val and val not in seen:
@@ -451,13 +571,14 @@ def read_patterns_file() -> Dict[str, str]:
 
 # ------------------------------ экспорт ------------------------------------ #
 def export_search(rows: List[dict], path: str = RESULTS_CSV) -> str:
+    _strip = re.compile(r"\033\[[0-9;]*m")
     with open(path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["url", "title", "matched", "snippets"])
         for r in rows:
-            w.writerow([r["url"], r["title"], "; ".join(r["matched"]),
-                        "  ||  ".join(r["snippets"])])
-    return os.path.abspath(path)
+            snips = "  ||  ".join(_strip.sub("", s) for s in r["snippets"])
+            w.writerow([r["url"], r["title"], "; ".join(r["matched"]), snips])
+    return path
 
 
 def export_extract(rows: List[dict], path: str = EXTRACT_CSV) -> str:
@@ -466,59 +587,59 @@ def export_extract(rows: List[dict], path: str = EXTRACT_CSV) -> str:
         w.writerow(["type", "value", "url", "title"])
         for r in rows:
             w.writerow([r["type"], r["value"], r["url"], r["title"]])
-    return os.path.abspath(path)
+    return path
 
 
 # ------------------------------ печать ------------------------------------- #
 def print_search(rows: List[dict]) -> None:
     if not rows:
-        print("Ничего не найдено.")
+        warn("Ничего не найдено.")
         return
-    print(f"\n=== Совпадений: {len(rows)} ===")
+    section(f"Совпадений: {len(rows)}")
     for i, r in enumerate(rows, 1):
-        print(f"\n{i}. {r['title'] or '(без заголовка)'}")
-        print(f"   {r['url']}")
-        print(f"   совпало: {', '.join(r['matched'])}")
+        print(f"\n{c(str(i)+'.', C.BOLD, C.GREEN)} {c(r['title'] or '(без заголовка)', C.BOLD)}")
+        print(f"   {c(r['url'], C.BLUE)}")
+        print(f"   {c('совпало:', C.GRAY)} {', '.join(c(t, C.YELLOW) for t in r['matched'])}")
         for s in r["snippets"]:
-            print(f"     - {s}")
+            print(f"     {c('›', C.GRAY)} {s}")
 
 
 def print_extract(rows: List[dict]) -> None:
     if not rows:
-        print("Ничего не извлечено.")
+        warn("Ничего не извлечено.")
         return
     by_type: Dict[str, List[str]] = {}
     for r in rows:
         by_type.setdefault(r["type"], []).append(r["value"])
-    print(f"\n=== Извлечено значений: {len(rows)} ===")
+    section(f"Извлечено значений: {len(rows)}")
     for t, vals in by_type.items():
         uniq = list(dict.fromkeys(vals))
-        print(f"\n[{t}] всего {len(uniq)}:")
+        print(f"\n{c('['+t+']', C.CYAN, C.BOLD)} {c('всего '+str(len(uniq)), C.GRAY)}")
         for v in uniq[:50]:
             print(f"   {v}")
         if len(uniq) > 50:
-            print(f"   … ещё {len(uniq) - 50}")
+            info(f"… ещё {len(uniq) - 50}")
 
 
 # ------------------------------ CLI ---------------------------------------- #
 def make_pool() -> ProxyPool:
     proxies = read_proxies()
     if proxies:
-        print(f"Прокси: {len(proxies)} (DIRECT как fallback)")
+        info(f"прокси: {len(proxies)} (DIRECT как fallback)")
     else:
-        print("Прокси: нет (DIRECT)")
+        info("прокси: нет (напрямую)")
     return ProxyPool(proxies)
 
 
 def cmd_fetch(args) -> None:
     pool = make_pool()
     title, text, links = parse_article(args.url, pool)
-    print(f"\nTITLE: {title}")
-    print(f"LINKS (telegra.ph): {len(links)}")
-    print("-" * 60)
+    section(title or "(без заголовка)")
+    info(f"telegra.ph-ссылок внутри: {len(links)}")
+    print(c("─" * 54, C.GRAY))
     print(text[:args.limit])
     if len(text) > args.limit:
-        print(f"\n… обрезано, всего {len(text)} символов (--limit чтобы больше)")
+        info(f"обрезано, всего {len(text)} символов (--limit чтобы больше)")
 
 
 def cmd_add(args) -> None:
@@ -526,11 +647,12 @@ def cmd_add(args) -> None:
     db = load_db()
     urls = list(args.urls) if args.urls else read_lines(SEED_FILE)
     if not urls:
-        print(f"Нет URL. Передай аргументом или заполни {SEED_FILE}")
+        warn(f"Нет URL. Передай аргументом или заполни {os.path.basename(SEED_FILE)}")
         return
+    section("Добавление в базу")
     added = add_urls(urls, db, pool, force=args.force)
     save_db(db)
-    print(f"\nДобавлено: {added} | В базе: {len(db)}")
+    ok(f"добавлено: {added}  ·  в базе: {len(db)}")
 
 
 def cmd_crawl(args) -> None:
@@ -538,17 +660,18 @@ def cmd_crawl(args) -> None:
     db = load_db()
     seeds = list(args.urls) if args.urls else read_lines(SEED_FILE)
     if not seeds:
-        print(f"Нет стартовых URL. Заполни {SEED_FILE} или передай аргументом.")
+        warn(f"Нет стартовых URL. Заполни {os.path.basename(SEED_FILE)} или передай аргументом.")
         return
+    section("Crawl")
     added = crawl(seeds, db, pool, args.max_pages)
     save_db(db)
-    print(f"\nCrawl добавил: {added} | В базе: {len(db)}")
+    ok(f"crawl добавил: {added}  ·  в базе: {len(db)}")
 
 
 def cmd_search(args) -> None:
     db = load_db()
     if not db:
-        print(f"База пуста. Сначала add/crawl. ({DB_FILE})")
+        warn(f"База пуста. Сначала add/crawl. ({os.path.basename(DB_FILE)})")
         return
     if args.terms:
         terms, mode = list(args.terms), ("AND" if args.all else "OR")
@@ -557,19 +680,19 @@ def cmd_search(args) -> None:
         if args.all:
             mode = "AND"
     if not terms:
-        print(f"Нет ключевых слов. Передай аргументом или заполни {KEYWORDS_FILE}")
+        warn(f"Нет ключевых слов. Передай аргументом или заполни {os.path.basename(KEYWORDS_FILE)}")
         return
-    print(f"Поиск: MODE={mode} regex={args.regex} слов={len(terms)} в {len(db)} статьях")
+    info(f"MODE={mode}  regex={args.regex}  слов={len(terms)}  статей={len(db)}")
     rows = search_db(db, terms, mode, args.regex, not args.case)
     print_search(rows)
     if rows:
-        print(f"\nCSV: {export_search(rows)}")
+        ok(f"CSV: {export_search(rows)}")
 
 
 def cmd_extract(args) -> None:
     db = load_db()
     if not db:
-        print(f"База пуста. Сначала add/crawl. ({DB_FILE})")
+        warn(f"База пуста. Сначала add/crawl. ({os.path.basename(DB_FILE)})")
         return
     patterns: Dict[str, str] = {}
     if args.regex:
@@ -580,60 +703,87 @@ def cmd_extract(args) -> None:
             if t in BUILTIN_PATTERNS:
                 patterns[t] = BUILTIN_PATTERNS[t]
             else:
-                print(f"  [?] нет встроенного шаблона '{t}'. Доступны: {', '.join(BUILTIN_PATTERNS)}")
-    file_pats = read_patterns_file()
-    patterns.update(file_pats)
+                warn(f"нет встроенного шаблона '{t}'. Доступны: {', '.join(BUILTIN_PATTERNS)}")
+    patterns.update(read_patterns_file())
     if not patterns:
-        # по умолчанию — все встроенные
         patterns = dict(BUILTIN_PATTERNS)
-        print("Шаблоны не заданы — использую все встроенные.")
+        info("шаблоны не заданы — использую все встроенные.")
     rows = extract_db(db, patterns, not args.case)
     print_extract(rows)
     if rows:
-        print(f"\nCSV: {export_extract(rows)}")
+        ok(f"CSV: {export_extract(rows)}")
+
+
+# --------------------------- интерактивное меню ---------------------------- #
+def _menu_prompt(text: str) -> str:
+    return input(c("  » ", C.CYAN) + text + ": ").strip()
 
 
 def cmd_menu(_args) -> None:
     pool = make_pool()
     db = load_db()
     while True:
-        print(f"\n=== Telegraph Parser === (в базе: {len(db)} статей)")
-        print(" 1) Добавить URL(ы) в базу")
-        print(" 2) Добавить из urls_seed.txt")
-        print(" 3) CRAWL из urls_seed.txt (расти по ссылкам)")
-        print(" 4) Поиск по keywords.txt")
-        print(" 5) Extract (символы: email/@ник/t.me/кошельки/...)")
-        print(" 6) Скачать и показать одну статью")
-        print(" 0) Выход")
-        c = input("> ").strip()
+        banner()
+        print(c(f"  база: {len(db)} статей", C.GRAY) +
+              c(f"   ·   папка: {APP_DIR}", C.GRAY))
+        print()
+        items = [
+            ("1", "Добавить URL(ы) в базу"),
+            ("2", "Добавить из urls_seed.txt"),
+            ("3", "CRAWL из urls_seed.txt (расти по ссылкам)"),
+            ("4", "Поиск по keywords.txt"),
+            ("5", "Extract (email / @ник / t.me / кошельки / коды…)"),
+            ("6", "Скачать и показать одну статью"),
+            ("0", "Выход"),
+        ]
+        for key, label in items:
+            print(f"   {c(key, C.BOLD, C.GREEN)}  {label}")
+        choice = _menu_prompt("выбор")
         try:
-            if c == "1":
-                u = input("URL(ы) через пробел: ").split()
-                save_db(db) if add_urls(u, db, pool) or True else None
-            elif c == "2":
-                add_urls(read_lines(SEED_FILE), db, pool); save_db(db)
-            elif c == "3":
+            if choice == "1":
+                u = _menu_prompt("URL(ы) через пробел").split()
+                add_urls(u, db, pool)
+                save_db(db)
+            elif choice == "2":
+                add_urls(read_lines(SEED_FILE), db, pool)
+                save_db(db)
+            elif choice == "3":
                 seeds = read_lines(SEED_FILE)
                 if seeds:
-                    crawl(seeds, db, pool, CRAWL_MAX_PAGES); save_db(db)
+                    crawl(seeds, db, pool, CRAWL_MAX_PAGES)
+                    save_db(db)
                 else:
-                    print(f"{SEED_FILE} пуст.")
-            elif c == "4":
+                    warn(f"{os.path.basename(SEED_FILE)} пуст.")
+            elif choice == "4":
                 mode, terms = read_keywords()
-                print_search(search_db(db, terms, mode, regex=False, ignore_case=True))
-            elif c == "5":
+                rows = search_db(db, terms, mode, regex=False, ignore_case=True)
+                print_search(rows)
+                if rows:
+                    ok(f"CSV: {export_search(rows)}")
+            elif choice == "5":
                 pats = read_patterns_file() or dict(BUILTIN_PATTERNS)
-                print_extract(extract_db(db, pats, ignore_case=True))
-            elif c == "6":
-                u = input("telegra.ph URL: ").strip()
+                rows = extract_db(db, pats, ignore_case=True)
+                print_extract(rows)
+                if rows:
+                    ok(f"CSV: {export_extract(rows)}")
+            elif choice == "6":
+                u = _menu_prompt("telegra.ph URL")
                 title, text, links = parse_article(u, pool)
-                print(f"\nTITLE: {title}\nlinks={len(links)}\n{'-'*50}\n{text[:2000]}")
-            elif c == "0":
+                section(title or "(без заголовка)")
+                info(f"ссылок: {len(links)}")
+                print(text[:2000])
+            elif choice == "0":
+                print(c("  пока!", C.CYAN))
                 break
             else:
-                print("Не понял.")
+                warn("не понял, выбери цифру из меню.")
+        except KeyboardInterrupt:
+            print()
+            break
         except Exception as e:
-            print(f"[error] {e}")
+            err(str(e))
+        input(c("\n  Enter — продолжить…", C.GRAY))
+        print()
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -653,10 +803,10 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--force", action="store_true", help="перекачать даже если уже в базе")
     a.set_defaults(func=cmd_add)
 
-    c = sub.add_parser("crawl", help="обход по ссылкам внутри статей")
-    c.add_argument("urls", nargs="*", help="стартовые URL; если пусто — из urls_seed.txt")
-    c.add_argument("--max-pages", type=int, default=CRAWL_MAX_PAGES)
-    c.set_defaults(func=cmd_crawl)
+    cr = sub.add_parser("crawl", help="обход по ссылкам внутри статей")
+    cr.add_argument("urls", nargs="*", help="стартовые URL; если пусто — из urls_seed.txt")
+    cr.add_argument("--max-pages", type=int, default=CRAWL_MAX_PAGES)
+    cr.set_defaults(func=cmd_crawl)
 
     s = sub.add_parser("search", help="поиск по словам/фразам/regex")
     s.add_argument("terms", nargs="*", help="слова/фразы; если пусто — из keywords.txt")
@@ -679,13 +829,21 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    _init_color()
+    ensure_files()
     parser = build_parser()
     args = parser.parse_args()
-    if not getattr(args, "func", None):
-        # без аргументов — сразу меню, чтобы работало двойным кликом
-        cmd_menu(args)
-        return
-    args.func(args)
+    try:
+        if not getattr(args, "func", None):
+            cmd_menu(args)         # без аргументов / двойной клик по .exe -> меню
+        else:
+            args.func(args)
+    except KeyboardInterrupt:
+        print()
+    except Exception as e:
+        err(str(e))
+        if getattr(sys, "frozen", False):
+            input("\nEnter — закрыть…")   # чтобы окно .exe не схлопнулось на ошибке
 
 
 if __name__ == "__main__":

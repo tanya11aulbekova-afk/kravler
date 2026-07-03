@@ -1,0 +1,13 @@
+# PyInstaller / сборка
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+
+# рабочие данные (создаются программой)
+articles_db.json
+results.csv
+extracted.csv
+proxies_alive.txt
+proxies_dead.txt

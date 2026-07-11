@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вариант 4 · Продуктовый маркетплейс — KRAVLER</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --ink: #16171b;
+    --dim: #6f7280;
+    --line: #e6e7eb;
+    --red: #e3172c;
+    --red-dark: #c00e21;
+    --black: #17181c;
+    --r: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: Inter, sans-serif; font-size: 15px; line-height: 1.6; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  header { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+  .h-in { display: flex; align-items: center; gap: 26px; padding: 14px 24px; max-width: 1200px; margin: 0 auto; }
+  .logo { font-weight: 900; font-size: 21px; letter-spacing: -0.02em; }
+  .logo i { font-style: normal; color: var(--red); }
+  .h-search { flex: 1; display: flex; background: var(--bg); border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .h-search:focus-within { border-color: var(--red); }
+  .h-search input { flex: 1; border: none; background: none; outline: none; padding: 11px 16px; font-family: Inter; font-size: 14px; }
+  .h-search button { border: none; background: var(--red); color: #fff; font-weight: 700; font-size: 13px; padding: 0 22px; cursor: pointer; font-family: Inter; }
+  .h-links { display: flex; align-items: center; gap: 18px; font-size: 14px; font-weight: 500; color: var(--dim); }
+  .h-links a:hover { color: var(--red); }
+  .btn { display: inline-block; font-weight: 700; font-size: 14px; padding: 11px 22px; border-radius: 12px; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red-dark); }
+  .btn-dark { background: var(--black); color: #fff; }
+
+  .subnav { border-top: 1px solid var(--line); background: var(--card); }
+  .subnav .wrap { display: flex; gap: 8px; padding-top: 10px; padding-bottom: 10px; overflow-x: auto; }
+  .chip { flex-shrink: 0; font-size: 13.5px; font-weight: 600; padding: 8px 16px; border-radius: 999px; background: var(--bg); color: var(--ink); }
+  .chip:hover { background: #ececef; }
+  .chip.on { background: var(--black); color: #fff; }
+
+  .hero { margin: 24px auto 0; max-width: 1200px; padding: 0 24px; }
+  .hero-card { position: relative; background: linear-gradient(115deg, #1a1b20 42%, #3d0b12 78%, #e3172c 130%); color: #fff; border-radius: 22px; padding: 54px 56px; overflow: hidden; }
+  .hero-card::after { content: "K"; position: absolute; right: 30px; bottom: -60px; font-size: 300px; font-weight: 900; color: rgba(255,255,255,.05); line-height: 1; }
+  .hero-card h1 { font-size: clamp(30px, 4.4vw, 52px); font-weight: 900; letter-spacing: -0.02em; line-height: 1.06; max-width: 640px; }
+  .hero-card h1 i { font-style: normal; color: #ff5b6a; }
+  .hero-card p { color: rgba(255,255,255,.72); max-width: 480px; margin: 16px 0 28px; }
+  .hero-badges { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
+  .hb { font-size: 12.5px; font-weight: 600; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16); padding: 7px 14px; border-radius: 999px; }
+
+  section { max-width: 1200px; margin: 40px auto 0; padding: 0 24px; }
+  .sec-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+  .more { font-size: 14px; font-weight: 600; color: var(--red); }
+
+  .games { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .game { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 16px; display: flex; align-items: center; gap: 12px; transition: .15s; }
+  .game:hover { border-color: var(--red); box-shadow: 0 6px 20px rgba(23,24,28,.07); }
+  .g-ico { width: 42px; height: 42px; border-radius: 11px; background: var(--black); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+  .game:nth-child(2n) .g-ico { background: var(--red); }
+  .game b { display: block; font-size: 14px; line-height: 1.25; }
+  .game span { font-size: 12px; color: var(--dim); }
+
+  .offers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: flex; flex-direction: column; transition: .15s; }
+  .card:hover { box-shadow: 0 10px 28px rgba(23,24,28,.09); transform: translateY(-2px); }
+  .c-tag { font-size: 11.5px; font-weight: 600; color: var(--dim); }
+  .c-tag b { color: var(--red); font-weight: 700; }
+  .card h3 { font-size: 15.5px; font-weight: 700; line-height: 1.35; margin: 8px 0 10px; flex: 1; }
+  .c-seller { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--dim); margin-bottom: 14px; }
+  .ava { width: 22px; height: 22px; border-radius: 50%; background: var(--black); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .c-seller i { font-style: normal; color: #f5a623; }
+  .c-foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 13px; }
+  .price { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+  .c-buy { font-size: 12.5px; font-weight: 700; color: #fff; background: var(--red); border-radius: 9px; padding: 8px 14px; }
+  .c-buy:hover { background: var(--red-dark); }
+
+  .trust { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .t { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+  .t-ico { width: 38px; height: 38px; border-radius: 10px; background: #fde9eb; color: var(--red); font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .t b { display: block; font-size: 15px; margin-bottom: 4px; }
+  .t p { font-size: 13px; color: var(--dim); }
+
+  .cta { background: var(--black); color: #fff; border-radius: 22px; padding: 44px 48px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .cta h2 { font-size: 28px; }
+  .cta p { color: rgba(255,255,255,.65); margin-top: 6px; }
+
+  footer { max-width: 1200px; margin: 40px auto 0; padding: 22px 24px 34px; display: flex; justify-content: space-between; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="h-in">
+      <div class="logo">KRAVLER<i>.</i></div>
+      <div class="h-search"><input placeholder="Поиск: CS2, гемы, Robux, аккаунт Genshin…"><button>Найти</button></div>
+      <div class="h-links"><a href="#">Помощь</a><a href="#">Войти</a></div>
+      <a class="btn btn-red" href="#">Продать</a>
+    </div>
+    <div class="subnav">
+      <div class="wrap">
+        <a class="chip on" href="#">Все</a><a class="chip" href="#">CS2</a><a class="chip" href="#">Dota 2</a><a class="chip" href="#">Genshin Impact</a><a class="chip" href="#">Fortnite</a><a class="chip" href="#">Brawl Stars</a><a class="chip" href="#">Roblox</a><a class="chip" href="#">Valorant</a><a class="chip" href="#">Steam</a><a class="chip" href="#">Minecraft</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-card">
+      <h1>Игровые товары<br>с гарантией <i>сделки</i></h1>
+      <p>Аккаунты, валюта, скины и буст от проверенных продавцов. Деньги под защитой эскроу до получения товара.</p>
+      <a class="btn btn-red" href="#" style="padding:14px 30px">Перейти в каталог</a>
+      <div class="hero-badges"><span class="hb">🛡 Эскроу-защита</span><span class="hb">⚡ Выдача от 1 минуты</span><span class="hb">↩ Гарантия возврата</span><span class="hb">💬 Поддержка 24/7</span></div>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head"><h2>Популярные игры</h2><a class="more" href="#">Все игры →</a></div>
+    <div class="games">
+      <a class="game" href="#"><span class="g-ico">CS</span><span><b>CS2</b><span>3 210 лотов</span></span></a>
+      <a class="game" href="#"><span class="g-ico">D2</span><span><b>Dota 2</b><span>2 480 лотов</span></span></a>
+      <a class="game" href="#"><span class="g-ico">GI</span><span><b>Genshin</b><span>1 890 лотов</span></span></a>
+      <a class="game" href="#"><span class="g-ico">FN</span><span><b>Fortnite</b><span>1 540 лотов</span></span></a>
+      <a class="game" href="#"><span class="g-ico">BS</span><span><b>Brawl Stars</b><span>1 120 лотов</span></span></a>
+      <a class="game" href="#"><span class="g-ico">RB</span><span><b>Roblox</b><span>980 лотов</span></span></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Популярные предложения</h2><a class="more" href="#">Весь каталог →</a></div>
+    <div class="offers">
+      <div class="card"><span class="c-tag"><b>CS2</b> · Скины</span><h3>★ Karambit | Doppler Factory New</h3><div class="c-seller"><span class="ava">V</span>VeteranTrade · <i>★</i> 4.9</div><div class="c-foot"><span class="price">84 500 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Steam</b> · Пополнение</span><h3>Пополнение кошелька Steam RU/KZ</h3><div class="c-seller"><span class="ava">F</span>FastWallet · <i>★</i> 5.0</div><div class="c-foot"><span class="price">от 100 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Genshin</b> · Аккаунты</span><h3>Аккаунт AR 60 · 14 легендарных</h3><div class="c-seller"><span class="ava">P</span>PrimoStore · <i>★</i> 4.8</div><div class="c-foot"><span class="price">24 900 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Dota 2</b> · Услуги</span><h3>Буст MMR 1000–5000 · Immortal</h3><div class="c-seller"><span class="ava">A</span>AscendBoost · <i>★</i> 4.9</div><div class="c-foot"><span class="price">3 500 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Brawl Stars</b> · Донат</span><h3>Гемы 2000 + 170 бонусом</h3><div class="c-seller"><span class="ava">G</span>GemDealer · <i>★</i> 4.9</div><div class="c-foot"><span class="price">4 990 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Roblox</b> · Валюта</span><h3>Robux 10 000 через геймпасс</h3><div class="c-seller"><span class="ava">B</span>BlockMarket · <i>★</i> 4.8</div><div class="c-foot"><span class="price">6 200 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Fortnite</b> · Аккаунты</span><h3>Аккаунт 120+ скинов · OG</h3><div class="c-seller"><span class="ava">S</span>SkinVault · <i>★</i> 4.7</div><div class="c-foot"><span class="price">15 900 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="c-tag"><b>Valorant</b> · Аккаунты</span><h3>Аккаунт Immortal 3 · EU · 40 скинов</h3><div class="c-seller"><span class="ava">R</span>RadiantShop · <i>★</i> 4.6</div><div class="c-foot"><span class="price">11 400 ₽</span><a class="c-buy" href="#">Купить</a></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Почему Kravler</h2></div>
+    <div class="trust">
+      <div class="t"><div class="t-ico">🛡</div><b>Эскроу-защита</b><p>Деньги заморожены до подтверждения выдачи товара.</p></div>
+      <div class="t"><div class="t-ico">↩</div><b>Гарантия возврата</b><p>Не получили товар — вернём полную стоимость.</p></div>
+      <div class="t"><div class="t-ico">★</div><b>Честный рейтинг</b><p>История сделок каждого продавца открыта.</p></div>
+      <div class="t"><div class="t-ico">💬</div><b>Поддержка 24/7</b><p>Арбитраж решает споры в среднем за 15 минут.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="cta">
+      <div><h2>Начните продавать на Kravler</h2><p>Комиссия от 5%, выплаты каждый день, 126 000 покупателей.</p></div>
+      <a class="btn btn-red" href="#" style="padding:14px 30px">Разместить товар</a>
+    </div>
+  </section>
+
+  <footer><span>© 2026 Kravler</span><span>Вариант 4 — «Продуктовый маркетплейс»</span></footer>
+</body>
+</html>

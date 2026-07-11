@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вариант 2 · Швейцарский брутализм — KRAVLER</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+  :root { --red: #e10600; --black: #0a0a0a; --white: #ffffff; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--white); color: var(--black); font-family: Inter, sans-serif; font-size: 15px; line-height: 1.55; }
+  a { color: inherit; text-decoration: none; }
+
+  header { display: flex; align-items: stretch; border-bottom: 3px solid var(--black); position: sticky; top: 0; background: var(--white); z-index: 10; }
+  .logo { font-weight: 900; font-size: 22px; letter-spacing: -0.02em; padding: 18px 28px; border-right: 3px solid var(--black); text-transform: uppercase; }
+  .logo span { color: var(--red); }
+  nav { display: flex; align-items: center; gap: 0; flex: 1; }
+  nav a { padding: 21px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; border-right: 1px solid var(--black); }
+  nav a:hover { background: var(--black); color: var(--white); }
+  .h-cta { display: flex; }
+  .h-cta a { display: flex; align-items: center; padding: 0 30px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+  .h-cta .login { border-left: 3px solid var(--black); }
+  .h-cta .sell { background: var(--red); color: var(--white); border-left: 3px solid var(--black); }
+  .h-cta .sell:hover { background: var(--black); }
+
+  .hero { border-bottom: 3px solid var(--black); }
+  .hero-top { padding: 60px 28px 40px; }
+  h1 { font-weight: 900; font-size: clamp(52px, 9.6vw, 138px); line-height: .92; letter-spacing: -0.03em; text-transform: uppercase; }
+  h1 .stroke { color: var(--white); -webkit-text-stroke: 2.5px var(--black); }
+  h1 .red { color: var(--red); }
+  .hero-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; border-top: 3px solid var(--black); }
+  .hero-cell { padding: 26px 28px; border-right: 3px solid var(--black); }
+  .hero-cell:last-child { border-right: none; }
+  .hero-cell p { font-size: 14px; max-width: 380px; }
+  .hero-cell .big { font-weight: 900; font-size: 34px; letter-spacing: -0.02em; }
+  .hero-cell .lbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; color: var(--red); margin-bottom: 6px; }
+
+  .marquee { overflow: hidden; background: var(--black); color: var(--white); border-bottom: 3px solid var(--black); padding: 12px 0; }
+  .mq { display: flex; gap: 40px; width: max-content; animation: mq 30s linear infinite; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .18em; white-space: nowrap; }
+  .mq b { color: var(--red); }
+  @keyframes mq { to { transform: translateX(-50%); } }
+
+  section { border-bottom: 3px solid var(--black); }
+  .sec-title { display: flex; justify-content: space-between; align-items: baseline; padding: 34px 28px 26px; }
+  h2 { font-weight: 900; font-size: clamp(28px, 4vw, 48px); text-transform: uppercase; letter-spacing: -0.02em; }
+  h2 sup { color: var(--red); font-size: .45em; vertical-align: super; }
+  .all { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; border-bottom: 3px solid var(--red); padding-bottom: 2px; }
+
+  .cats { display: grid; grid-template-columns: repeat(6, 1fr); border-top: 3px solid var(--black); }
+  .cat { padding: 24px 20px 30px; border-right: 1px solid var(--black); }
+  .cat:last-child { border-right: none; }
+  .cat:hover { background: var(--red); color: var(--white); }
+  .cat .n { font-size: 12px; font-weight: 800; color: var(--red); }
+  .cat:hover .n { color: var(--white); }
+  .cat b { display: block; font-weight: 800; font-size: 17px; margin-top: 26px; text-transform: uppercase; letter-spacing: .02em; }
+  .cat span { font-size: 12px; opacity: .65; }
+
+  .offers { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 3px solid var(--black); }
+  .card { padding: 26px 26px 30px; border-right: 1px solid var(--black); border-bottom: 1px solid var(--black); position: relative; }
+  .card:nth-child(3n) { border-right: none; }
+  .card:nth-child(n+4) { border-bottom: none; }
+  .card:hover { box-shadow: inset 0 0 0 3px var(--red); }
+  .cat-tag { display: inline-block; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; background: var(--black); color: var(--white); padding: 5px 10px; }
+  .card h3 { font-weight: 800; font-size: 20px; letter-spacing: -0.01em; margin: 16px 0 6px; }
+  .card .meta { font-size: 12.5px; opacity: .6; margin-bottom: 22px; }
+  .card .row { display: flex; justify-content: space-between; align-items: center; }
+  .price { font-weight: 900; font-size: 24px; letter-spacing: -0.02em; }
+  .buy { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; background: var(--red); color: var(--white); padding: 12px 20px; }
+  .buy:hover { background: var(--black); }
+
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 3px solid var(--black); }
+  .step { padding: 30px 28px 40px; border-right: 1px solid var(--black); }
+  .step:last-child { border-right: none; }
+  .step .num { font-weight: 900; font-size: 64px; line-height: 1; color: var(--white); -webkit-text-stroke: 2px var(--red); }
+  .step b { display: block; font-weight: 800; font-size: 18px; text-transform: uppercase; margin: 18px 0 8px; }
+  .step p { font-size: 14px; opacity: .7; max-width: 330px; }
+
+  .cta { background: var(--red); color: var(--white); text-align: center; padding: 70px 28px; }
+  .cta h2 { font-size: clamp(34px, 5.4vw, 72px); }
+  .cta a { display: inline-block; margin-top: 30px; background: var(--white); color: var(--black); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: .12em; padding: 18px 40px; border: 3px solid var(--black); box-shadow: 6px 6px 0 var(--black); }
+  .cta a:hover { transform: translate(3px, 3px); box-shadow: 3px 3px 0 var(--black); }
+
+  footer { display: flex; justify-content: space-between; padding: 20px 28px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; background: var(--black); color: var(--white); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">Krav<span>ler</span></div>
+    <nav><a href="#">Каталог</a><a href="#">Игры</a><a href="#">Гарантии</a><a href="#">Поддержка</a></nav>
+    <div class="h-cta"><a class="login" href="#">Войти</a><a class="sell" href="#">Продать +</a></div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-top">
+      <h1>Игровой<br><span class="stroke">рынок</span> <span class="red">№1</span></h1>
+    </div>
+    <div class="hero-grid">
+      <div class="hero-cell">
+        <div class="lbl">Что это</div>
+        <p>Аккаунты, валюта, скины, ключи и буст. Покупай и продавай напрямую — платформа гарантирует каждую сделку.</p>
+      </div>
+      <div class="hero-cell">
+        <div class="lbl">Сделок</div>
+        <div class="big">126 000+</div>
+      </div>
+      <div class="hero-cell">
+        <div class="lbl">Средняя выдача</div>
+        <div class="big">7 минут</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee">
+    <div class="mq">
+      <span>CS2 <b>///</b> Dota 2 <b>///</b> Genshin Impact <b>///</b> Fortnite <b>///</b> Brawl Stars <b>///</b> Roblox <b>///</b> Valorant <b>///</b> Steam <b>///</b> Minecraft <b>///</b> World of Tanks <b>///</b></span>
+      <span>CS2 <b>///</b> Dota 2 <b>///</b> Genshin Impact <b>///</b> Fortnite <b>///</b> Brawl Stars <b>///</b> Roblox <b>///</b> Valorant <b>///</b> Steam <b>///</b> Minecraft <b>///</b> World of Tanks <b>///</b></span>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-title"><h2>Категории<sup>06</sup></h2><a class="all" href="#">Весь каталог</a></div>
+    <div class="cats">
+      <a class="cat" href="#"><span class="n">01</span><b>Аккаунты</b><span>4 лота</span></a>
+      <a class="cat" href="#"><span class="n">02</span><b>Валюта</b><span>2 лота</span></a>
+      <a class="cat" href="#"><span class="n">03</span><b>Ключи</b><span>2 лота</span></a>
+      <a class="cat" href="#"><span class="n">04</span><b>Скины</b><span>2 лота</span></a>
+      <a class="cat" href="#"><span class="n">05</span><b>Буст</b><span>2 лота</span></a>
+      <a class="cat" href="#"><span class="n">06</span><b>Донат</b><span>4 лота</span></a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-title"><h2>Топ-лоты<sup>16</sup></h2><a class="all" href="#">Смотреть все</a></div>
+    <div class="offers">
+      <div class="card"><span class="cat-tag">CS2 · Скины</span><h3>★ Karambit | Doppler FN</h3><div class="meta">VeteranTrade · ★ 4.9 · 2 140 сделок</div><div class="row"><span class="price">84 500 ₽</span><a class="buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="cat-tag">Steam · Донат</span><h3>Пополнение Steam RU/KZ</h3><div class="meta">FastWallet · ★ 5.0 · 18 320 сделок</div><div class="row"><span class="price">от 100 ₽</span><a class="buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="cat-tag">Genshin · Аккаунты</span><h3>Аккаунт AR 60 · 14 легендарок</h3><div class="meta">PrimoStore · ★ 4.8 · 640 сделок</div><div class="row"><span class="price">24 900 ₽</span><a class="buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="cat-tag">Dota 2 · Буст</span><h3>Буст MMR 1000–5000</h3><div class="meta">AscendBoost · ★ 4.9 · 1 105 сделок</div><div class="row"><span class="price">3 500 ₽</span><a class="buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="cat-tag">Brawl Stars · Донат</span><h3>Гемы 2000 + бонус</h3><div class="meta">GemDealer · ★ 4.9 · 5 430 сделок</div><div class="row"><span class="price">4 990 ₽</span><a class="buy" href="#">Купить</a></div></div>
+      <div class="card"><span class="cat-tag">Roblox · Валюта</span><h3>Robux 10 000 · gift</h3><div class="meta">BlockMarket · ★ 4.8 · 3 210 сделок</div><div class="row"><span class="price">6 200 ₽</span><a class="buy" href="#">Купить</a></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-title"><h2>Как купить<sup>03</sup></h2></div>
+    <div class="steps">
+      <div class="step"><div class="num">01</div><b>Выбери лот</b><p>Фильтры по игре и категории. Рейтинг и сделки продавца — на карточке.</p></div>
+      <div class="step"><div class="num">02</div><b>Оплати</b><p>Деньги замораживаются на эскроу-счёте до выдачи товара.</p></div>
+      <div class="step"><div class="num">03</div><b>Получи товар</b><p>Подтверди получение — только тогда продавец получит деньги.</p></div>
+    </div>
+  </section>
+
+  <section class="cta" style="border-bottom:none">
+    <h2>Продавай свой инвентарь</h2>
+    <a href="#">Начать продавать</a>
+  </section>
+
+  <footer><span>© 2026 Kravler</span><span>Вариант 2 — «Швейцарский брутализм»</span></footer>
+</body>
+</html>

@@ -4,132 +4,106 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Каталог — KRAVLER</title>
-  <meta name="description" content="Каталог игровых товаров: аккаунты, валюта, ключи, предметы и услуги.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23891423'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' fill='%23faf7f2' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta name="description" content="Каталог игровых товаров: аккаунты, валюта, ключи, скины и услуги.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23d90f26'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='bold' font-size='19' fill='%23fff' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body>
+<body id="top">
 
-  <header class="site-header">
-    <a class="brand" href="index.html">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">Kravler</span>
-    </a>
-    <nav class="site-nav" aria-label="Основная навигация">
-      <a href="catalog.html">Каталог</a>
-      <a href="catalog.html#games">Игры</a>
-      <a href="index.html#guarantee">Гарантии</a>
-      <a href="index.html#how">Как это работает</a>
-    </nav>
-    <div class="header-actions">
-      <a class="link-quiet" href="#" data-demo>Войти</a>
-      <a class="btn btn-pill" href="#" data-demo>Продать<span class="pill-plus">+</span></a>
-    </div>
-  </header>
+  <header class="site-header"></header>
 
   <main>
-    <section class="page-head">
-      <p class="eyebrow">Все предложения</p>
-      <h1 class="page-title" id="catalog-title">Каталог</h1>
-      <p class="page-count" id="catalog-count"></p>
-    </section>
+    <div class="page-head">
+      <h1 id="catalog-title">Каталог</h1>
+      <p id="catalog-count"></p>
+    </div>
 
-    <form class="filters" id="filters" onsubmit="return false" aria-label="Фильтры каталога">
-      <div class="filter-group">
-        <label class="filter-label" for="f-game">Игра</label>
-        <select id="f-game"></select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label" for="f-cat">Категория</label>
-        <select id="f-cat"></select>
-      </div>
-      <div class="filter-group">
-        <label class="filter-label" for="f-sort">Сортировка</label>
+    <form class="filters" onsubmit="return false" aria-label="Фильтры каталога">
+      <div class="f-box"><label for="f-game">Игра</label><select id="f-game"></select></div>
+      <div class="f-box"><label for="f-cat">Раздел</label><select id="f-cat"></select></div>
+      <div class="f-box"><label for="f-sort">Сортировка</label>
         <select id="f-sort">
           <option value="pop">По популярности</option>
           <option value="cheap">Сначала дешевле</option>
           <option value="rich">Сначала дороже</option>
         </select>
       </div>
-      <div class="filter-group">
-        <label class="filter-label" for="f-q">Поиск</label>
-        <input type="search" id="f-q" placeholder="Название лота…">
-      </div>
-      <button class="filter-reset" type="button" id="f-reset">Сбросить</button>
+      <div class="f-box"><label for="f-q">Поиск</label><input type="search" id="f-q" placeholder="Название лота…"></div>
+      <button class="f-reset" type="button" id="f-reset">Сбросить</button>
     </form>
 
-    <div class="offers-grid" id="offers-grid"></div>
-    <div class="empty-state" id="empty-state" hidden>
-      <h3>Ничего не нашлось</h3>
-      <p>Попробуйте изменить фильтры или поисковый запрос.</p>
+    <div class="catalog-grid">
+      <div class="offers" id="offers-grid"></div>
+      <div class="empty-state" id="empty-state" hidden>
+        <h3>Ничего не нашлось</h3>
+        <p>Попробуйте изменить фильтры или поисковый запрос.</p>
+      </div>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-bottom">
-      <span>© 2026 Kravler. Маркетплейс игровых ценностей.</span>
-      <a href="index.html">На главную</a>
-    </div>
-  </footer>
+  <footer class="site-footer"></footer>
 
   <script src="assets/app.js"></script>
   <script>
-    const $game = document.getElementById('f-game');
-    const $cat  = document.getElementById('f-cat');
-    const $sort = document.getElementById('f-sort');
-    const $q    = document.getElementById('f-q');
-    const $grid = document.getElementById('offers-grid');
-    const $empty = document.getElementById('empty-state');
-    const $count = document.getElementById('catalog-count');
-    const $title = document.getElementById('catalog-title');
+    document.addEventListener('DOMContentLoaded', () => {
+      const $game = document.getElementById('f-game');
+      const $cat  = document.getElementById('f-cat');
+      const $sort = document.getElementById('f-sort');
+      const $q    = document.getElementById('f-q');
+      const $grid = document.getElementById('offers-grid');
+      const $empty = document.getElementById('empty-state');
+      const $count = document.getElementById('catalog-count');
+      const $title = document.getElementById('catalog-title');
 
-    $game.innerHTML = '<option value="">Все игры</option>' +
-      GAMES.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-    $cat.innerHTML = '<option value="">Все категории</option>' +
-      CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      $game.innerHTML = '<option value="">Все игры</option>' +
+        GAMES.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+      $cat.innerHTML = '<option value="">Все разделы</option>' +
+        CATEGORIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 
-    const params = new URLSearchParams(location.search);
-    if (params.get('cat'))  $cat.value  = params.get('cat');
-    if (params.get('game')) $game.value = params.get('game');
+      const params = new URLSearchParams(location.search);
+      if (params.get('cat'))  $cat.value  = params.get('cat');
+      if (params.get('game')) $game.value = params.get('game');
+      if (params.get('q'))    $q.value    = params.get('q');
 
-    function apply() {
-      let list = OFFERS.slice();
-      if ($game.value) list = list.filter(o => o.game === $game.value);
-      if ($cat.value)  list = list.filter(o => o.cat === $cat.value);
-      const q = $q.value.trim().toLowerCase();
-      if (q) list = list.filter(o =>
-        o.name.toLowerCase().includes(q) ||
-        gameOf(o.game).name.toLowerCase().includes(q) ||
-        o.seller.toLowerCase().includes(q));
-      if ($sort.value === 'cheap') list.sort((a, b) => a.price - b.price);
-      if ($sort.value === 'rich')  list.sort((a, b) => b.price - a.price);
-      if ($sort.value === 'pop')   list.sort((a, b) => b.deals - a.deals);
+      function apply() {
+        let list = OFFERS.slice();
+        if ($game.value) list = list.filter(o => o.game === $game.value);
+        if ($cat.value)  list = list.filter(o => o.cat === $cat.value);
+        const q = $q.value.trim().toLowerCase();
+        if (q) list = list.filter(o =>
+          o.name.toLowerCase().includes(q) ||
+          gameOf(o.game).name.toLowerCase().includes(q) ||
+          o.seller.toLowerCase().includes(q));
+        if ($sort.value === 'cheap') list.sort((a, b) => a.price - b.price);
+        if ($sort.value === 'rich')  list.sort((a, b) => b.price - a.price);
+        if ($sort.value === 'pop')   list.sort((a, b) => b.deals - a.deals);
 
-      $grid.innerHTML = list.map(offerCard).join('');
-      $empty.hidden = list.length > 0;
-      $count.textContent = `${list.length} ${plural(list.length)}`;
-      $title.textContent = $cat.value ? catOf($cat.value).name : 'Каталог';
-      document.title = `${$title.textContent} — KRAVLER`;
-    }
+        renderOffers($grid, list);
+        $empty.hidden = list.length > 0;
+        $count.textContent = `${list.length} ${offerPlural(list.length)} от проверенных продавцов · сделки под защитой эскроу`;
 
-    function plural(n) {
-      const m10 = n % 10, m100 = n % 100;
-      if (m10 === 1 && m100 !== 11) return 'предложение';
-      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'предложения';
-      return 'предложений';
-    }
+        let title = 'Каталог';
+        if ($game.value && $cat.value) title = `${gameOf($game.value).name} — ${catOf($cat.value).name.toLowerCase()}`;
+        else if ($game.value) title = gameOf($game.value).name;
+        else if ($cat.value) title = catOf($cat.value).name;
+        $title.textContent = title;
+        document.title = `${title} — KRAVLER`;
 
-    [$game, $cat, $sort].forEach(el => el.addEventListener('change', apply));
-    $q.addEventListener('input', apply);
-    document.getElementById('f-reset').addEventListener('click', () => {
-      $game.value = ''; $cat.value = ''; $sort.value = 'pop'; $q.value = '';
+        const header = document.querySelector('.site-header');
+        header.innerHTML = renderHeader($cat.value);
+        if ($q.value) header.querySelector('.h-search input').value = $q.value;
+      }
+
+      [$game, $cat, $sort].forEach(el => el.addEventListener('change', apply));
+      $q.addEventListener('input', apply);
+      document.getElementById('f-reset').addEventListener('click', () => {
+        $game.value = ''; $cat.value = ''; $sort.value = 'pop'; $q.value = '';
+        apply();
+      });
+
       apply();
     });
-
-    apply();
   </script>
 </body>
 </html>

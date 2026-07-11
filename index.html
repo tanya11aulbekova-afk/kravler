@@ -3,185 +3,68 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KRAVLER — маркетплейс игровых ценностей</title>
-  <meta name="description" content="Аккаунты, игровая валюта, ключи, предметы и услуги. Безопасная сделка, мгновенная выдача, гарантия возврата.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23891423'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='18' fill='%23faf7f2' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>KRAVLER — маркетплейс игровых товаров</title>
+  <meta name="description" content="Аккаунты, игровая валюта, ключи, скины и услуги. Эскроу-защита сделки, выдача от 1 минуты, гарантия возврата.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23d90f26'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='bold' font-size='19' fill='%23fff' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="assets/styles.css">
 </head>
-<body>
+<body id="top">
 
-  <header class="site-header" id="top">
-    <a class="brand" href="index.html">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span class="brand-name">Kravler</span>
-    </a>
-    <nav class="site-nav" aria-label="Основная навигация">
-      <a href="catalog.html">Каталог</a>
-      <a href="catalog.html#games">Игры</a>
-      <a href="index.html#guarantee">Гарантии</a>
-      <a href="index.html#how">Как это работает</a>
-    </nav>
-    <div class="header-actions">
-      <a class="link-quiet" href="#" data-demo>Войти</a>
-      <a class="btn btn-pill" href="#" data-demo>Продать<span class="pill-plus">+</span></a>
-    </div>
-  </header>
+  <header class="site-header"></header>
 
   <main>
-
-    <!-- HERO -->
-    <section class="hero">
-      <div class="hero-media" aria-hidden="true">
-        <div class="hero-glyph">K</div>
-        <div class="hero-ring"></div>
-        <div class="hero-ring hero-ring-2"></div>
-      </div>
-      <div class="hero-inner">
-        <p class="eyebrow">Маркетплейс игровых ценностей</p>
-        <h1 class="hero-title">Высшая<br>лига</h1>
-        <p class="hero-sub">Аккаунты, валюта, ключи, предметы и услуги —<br>от проверенных продавцов, с гарантией каждой сделки.</p>
-        <a class="btn btn-pill btn-dark" href="catalog.html">Открыть каталог<span class="pill-plus">+</span></a>
-      </div>
-      <div class="hero-foot">
-        <span>Est. 2026</span>
-        <span>12 400+ предложений</span>
-        <span>Сделка под защитой</span>
-      </div>
-    </section>
-
-    <!-- TICKER -->
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker-track">
-        <span>CS2</span><i></i><span>Dota 2</span><i></i><span>Steam</span><i></i><span>Genshin Impact</span><i></i><span>Fortnite</span><i></i><span>Brawl Stars</span><i></i><span>Roblox</span><i></i><span>Valorant</span><i></i><span>World of Tanks</span><i></i><span>Minecraft</span><i></i>
-        <span>CS2</span><i></i><span>Dota 2</span><i></i><span>Steam</span><i></i><span>Genshin Impact</span><i></i><span>Fortnite</span><i></i><span>Brawl Stars</span><i></i><span>Roblox</span><i></i><span>Valorant</span><i></i><span>World of Tanks</span><i></i><span>Minecraft</span><i></i>
-      </div>
+    <div class="hero">
+      <div class="promo p1"><span class="mark">🛡</span><b>Эскроу-защита каждой сделки</b><span>Деньги у платформы до выдачи товара</span></div>
+      <div class="promo p2"><span class="mark">%</span><b>−20% на пополнение Steam до конца недели</b><span>Промокод STEAM20</span></div>
+      <div class="promo p3"><span class="mark">⚡</span><b>Выдача от 1 минуты</b><span>Автовыдача у 4 800 лотов</span></div>
     </div>
 
-    <!-- CATEGORIES -->
-    <section class="categories" id="categories">
-      <div class="section-head">
-        <h2 class="section-title">Каталог</h2>
-        <a class="link-more" href="catalog.html">Все предложения<span class="pill-plus">+</span></a>
-      </div>
-      <div class="cat-grid" id="cat-grid"></div>
+    <section>
+      <div class="sec-head"><h2>Игры</h2><a class="more" href="catalog.html">Все игры →</a></div>
+      <div class="games" id="games-row"></div>
     </section>
 
-    <!-- FEATURED -->
-    <section class="featured">
-      <div class="section-head">
-        <h2 class="section-title">Избранные лоты</h2>
-        <a class="link-more" href="catalog.html">Смотреть все<span class="pill-plus">+</span></a>
-      </div>
-      <div class="rail" id="featured-rail"></div>
+    <section>
+      <div class="sec-head"><h2>Популярное сейчас</h2><a class="more" href="catalog.html">Весь каталог →</a></div>
+      <div class="offers" id="featured-offers"></div>
     </section>
 
-    <!-- EDITORIAL / GUARANTEE -->
-    <section class="editorial" id="guarantee">
-      <div class="editorial-left">
-        <h2 class="editorial-title">Сделка без<br>компромиссов</h2>
-        <p>Каждый лот проходит модерацию до публикации. Деньги замораживаются на счёте сделки и уходят продавцу только после того, как вы подтвердите получение товара.</p>
-        <p>Мы работаем с проверенными продавцами: рейтинг, история сделок и скорость выдачи открыты для каждого покупателя. Ничего не скрыто — ни комиссия, ни сроки.</p>
-        <p>Kravler существует для тех, кто ценит своё время и свой инвентарь. Одна сделка — одна гарантия. Навсегда.</p>
-        <a class="btn btn-pill" href="catalog.html">Смотреть каталог<span class="pill-plus">+</span></a>
-      </div>
-      <div class="editorial-right">
-        <div class="editorial-cell">
-          <h3>Эскроу<br>&amp; Защита</h3>
-          <p>Оплата хранится на защищённом счёте до подтверждения выдачи — без исключений.</p>
-        </div>
-        <div class="editorial-cell">
-          <h3>Гарантия<br>возврата</h3>
-          <p>Товар не получен или не соответствует описанию — вернём деньги полностью.</p>
-        </div>
+    <section id="how">
+      <div class="sec-head"><h2>Как проходит сделка</h2></div>
+      <div class="steps">
+        <div class="step"><span class="s-num">1</span><span><b>Выбираете лот</b><p>Рейтинг и история продавца — на карточке товара.</p></span></div>
+        <div class="step"><span class="s-num">2</span><span><b>Оплачиваете</b><p>Деньги замораживаются на эскроу-счёте платформы.</p></span></div>
+        <div class="step"><span class="s-num">3</span><span><b>Получаете товар</b><p>Продавец получает деньги после вашего подтверждения.</p></span></div>
       </div>
     </section>
 
-    <!-- STATS -->
-    <section class="stats">
-      <div class="stat"><span class="stat-num">126 000</span><span class="stat-label">завершённых сделок</span></div>
-      <div class="stat"><span class="stat-num">4.9</span><span class="stat-label">средний рейтинг продавцов</span></div>
-      <div class="stat"><span class="stat-num">7 мин</span><span class="stat-label">среднее время выдачи</span></div>
-      <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">поддержка и арбитраж</span></div>
-    </section>
-
-    <!-- HOW IT WORKS -->
-    <section class="how" id="how">
-      <div class="section-head">
-        <h2 class="section-title">Как это работает</h2>
-      </div>
-      <div class="how-grid">
-        <div class="how-step">
-          <span class="how-num">01</span>
-          <h3>Выберите лот</h3>
-          <p>Найдите нужный товар по игре и категории. Рейтинг и история продавца — перед глазами.</p>
-        </div>
-        <div class="how-step">
-          <span class="how-num">02</span>
-          <h3>Оплатите сделку</h3>
-          <p>Деньги замораживаются на счёте сделки. Продавец получает уведомление и передаёт товар.</p>
-        </div>
-        <div class="how-step">
-          <span class="how-num">03</span>
-          <h3>Подтвердите получение</h3>
-          <p>Проверьте товар и подтвердите сделку — только после этого продавец получит оплату.</p>
-        </div>
+    <section id="trust">
+      <div class="sec-head"><h2>Почему Kravler</h2></div>
+      <div class="trust">
+        <div class="t"><div class="t-ico">🛡</div><b>Эскроу-защита</b><p>Деньги заморожены до подтверждения выдачи товара.</p></div>
+        <div class="t"><div class="t-ico">↩</div><b>Гарантия возврата</b><p>Не получили товар — вернём полную стоимость.</p></div>
+        <div class="t"><div class="t-ico">★</div><b>Честный рейтинг</b><p>История сделок каждого продавца открыта.</p></div>
+        <div class="t"><div class="t-ico">💬</div><b>Поддержка 24/7</b><p>Арбитраж решает споры в среднем за 15 минут.</p></div>
       </div>
     </section>
 
-    <!-- CTA -->
-    <section class="cta">
-      <p class="eyebrow">Начните сейчас</p>
-      <h2 class="cta-title">Ваш инвентарь<br>заслуживает большего</h2>
-      <div class="cta-actions">
-        <a class="btn btn-pill btn-dark" href="catalog.html">Купить<span class="pill-plus">+</span></a>
-        <a class="btn btn-pill" href="#" data-demo>Продать<span class="pill-plus">+</span></a>
+    <section>
+      <div class="cta">
+        <div><h2>Начните продавать на Kravler</h2><p>Комиссия от 5%, выплаты каждый день, 126 000 покупателей.</p></div>
+        <a class="btn btn-red" href="#" data-demo>Разместить товар</a>
       </div>
     </section>
-
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-top">
-      <a class="brand brand-invert" href="index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-name">Kravler</span>
-      </a>
-      <div class="footer-cols">
-        <div class="footer-col">
-          <h4>Каталог</h4>
-          <a href="catalog.html?cat=accounts">Аккаунты</a>
-          <a href="catalog.html?cat=currency">Игровая валюта</a>
-          <a href="catalog.html?cat=keys">Ключи и гифты</a>
-          <a href="catalog.html?cat=items">Предметы и скины</a>
-          <a href="catalog.html?cat=services">Буст и услуги</a>
-        </div>
-        <div class="footer-col">
-          <h4>Покупателям</h4>
-          <a href="index.html#how">Как купить</a>
-          <a href="index.html#guarantee">Гарантии</a>
-          <a href="#" data-demo>Поддержка</a>
-        </div>
-        <div class="footer-col">
-          <h4>Продавцам</h4>
-          <a href="#" data-demo>Начать продавать</a>
-          <a href="#" data-demo>Комиссии</a>
-          <a href="#" data-demo>Правила</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Kravler. Маркетплейс игровых ценностей.</span>
-      <a href="#top">Наверх ↑</a>
-    </div>
-  </footer>
+  <footer class="site-footer"></footer>
 
   <script src="assets/app.js"></script>
   <script>
-    renderCategories(document.getElementById('cat-grid'));
-    renderRail(document.getElementById('featured-rail'), OFFERS.filter(o => o.featured));
+    document.addEventListener('DOMContentLoaded', () => {
+      renderGames(document.getElementById('games-row'), 8);
+      renderOffers(document.getElementById('featured-offers'), OFFERS.filter(o => o.featured));
+    });
   </script>
 </body>
 </html>

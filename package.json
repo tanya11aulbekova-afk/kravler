@@ -1,0 +1,20 @@
+{
+  "name": "kravler",
+  "version": "1.0.0",
+  "description": "KRAVLER — 3D scroll-flight marketplace concept for game goods",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --minify --outfile=app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:41729/git/tanya11aulbekova-afk/kravler"
+  },
+  "dependencies": {
+    "@fontsource/manrope": "^5.2.8",
+    "@fontsource/unbounded": "^5.2.8",
+    "three": "^0.165.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
+  }
+}

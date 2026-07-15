@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KRAVLER — полёт по маркетплейсу игровых товаров</title>
+<style>
+  /* ---------- fonts ---------- */
+  @font-face{font-family:'Unbounded';font-weight:600;font-display:swap;
+    src:url('./fonts/unbounded-cyrillic-600-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Unbounded';font-weight:600;font-display:swap;
+    src:url('./fonts/unbounded-latin-600-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Unbounded';font-weight:900;font-display:swap;
+    src:url('./fonts/unbounded-cyrillic-900-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Unbounded';font-weight:900;font-display:swap;
+    src:url('./fonts/unbounded-latin-900-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Manrope';font-weight:400;font-display:swap;
+    src:url('./fonts/manrope-cyrillic-400-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Manrope';font-weight:400;font-display:swap;
+    src:url('./fonts/manrope-latin-400-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Manrope';font-weight:700;font-display:swap;
+    src:url('./fonts/manrope-cyrillic-700-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Manrope';font-weight:700;font-display:swap;
+    src:url('./fonts/manrope-latin-700-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+
+  /* ---------- tokens ---------- */
+  :root{
+    --ink:#05070c;
+    --paper:#ece7da;        /* warm off-white, not pure white */
+    --muted:#8f96ab;
+    --gold:#e8b34b;
+    --gold-hi:#ffd98a;
+    --ember:#ff8a3d;
+    --ice:#9fd0ff;
+    --jade:#63d6b4;
+    --line:rgba(236,231,218,.14);
+    --glass:rgba(10,14,24,.62);
+    --display:'Unbounded',system-ui,sans-serif;
+    --body:'Manrope',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--body);
+    background:var(--ink);
+    color:var(--paper);
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--gold);color:var(--ink)}
+
+  #gl{position:fixed;inset:0;z-index:0;display:block}
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 4vw;
+  }
+  #flightbar{
+    position:fixed;top:0;left:0;right:0;height:2px;z-index:60;
+    background:linear-gradient(90deg,var(--gold),var(--ember));
+    transform:scaleX(0);transform-origin:left;
+  }
+  .logo{
+    font-family:var(--display);font-weight:900;font-size:1.05rem;
+    letter-spacing:.18em;color:var(--paper);text-decoration:none;
+  }
+  .logo b{color:var(--gold)}
+  nav{display:flex;gap:30px}
+  nav a{
+    color:var(--muted);text-decoration:none;
+    font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    transition:color .25s;
+  }
+  nav a:hover{color:var(--gold-hi)}
+  .btn{
+    display:inline-block;padding:13px 28px;
+    font-family:var(--display);font-weight:600;font-size:.78rem;letter-spacing:.1em;
+    text-decoration:none;text-transform:uppercase;cursor:pointer;border:none;
+    color:var(--ink);background:var(--gold);
+    clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    transition:background .25s,transform .25s;
+  }
+  .btn:hover{background:var(--gold-hi);transform:translateY(-2px)}
+  .btn-line{
+    background:transparent;color:var(--paper);
+    box-shadow:inset 0 0 0 1px var(--line);
+  }
+  .btn-line:hover{background:rgba(236,231,218,.08);color:var(--gold-hi)}
+  .btn:focus-visible,nav a:focus-visible,.logo:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
+
+  /* ---------- flight layout ----------
+     each .station is a stop along the camera route */
+  main{position:relative;z-index:1}
+  .station{
+    position:relative;
+    display:flex;align-items:center;
+    padding:0 5vw;
+  }
+  .station .inner{width:100%;max-width:1280px;margin:0 auto}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:.72rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:22px;
+  }
+  .eyebrow::before{content:'';width:34px;height:1px;background:var(--gold)}
+  h1,h2{font-family:var(--display);text-wrap:balance}
+  h2{font-size:clamp(1.5rem,3.4vw,2.6rem);font-weight:900;line-height:1.15;margin-bottom:16px}
+  .lead{color:var(--muted);line-height:1.7;max-width:46ch}
+
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease}
+  .reveal.on{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .reveal{transition:none;opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+
+  /* ---------- station 1 · hero ---------- */
+  #hero{min-height:100vh}
+  #hero .inner{display:grid;grid-template-columns:minmax(0,620px) 1fr}
+  h1{
+    font-size:clamp(2rem,5.2vw,4rem);font-weight:900;line-height:1.06;
+    margin-bottom:26px;
+  }
+  h1 .gold{color:var(--gold)}
+  h1 .outline{
+    color:transparent;
+    -webkit-text-stroke:1.5px rgba(236,231,218,.8);
+  }
+  .hero-note{
+    display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;
+    margin-top:38px;color:var(--muted);font-size:.85rem;
+  }
+  .hero-note b{
+    font-family:var(--display);font-weight:600;font-size:1.5rem;color:var(--paper);
+    font-variant-numeric:tabular-nums;
+  }
+  .hero-note .sep{color:rgba(236,231,218,.25)}
+  .hero-cta{display:flex;gap:16px;margin-top:34px;flex-wrap:wrap}
+  .scroll-cue{
+    position:absolute;bottom:30px;left:5vw;
+    display:flex;align-items:center;gap:12px;
+    color:var(--muted);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+  }
+  .scroll-cue::after{
+    content:'';width:1px;height:44px;background:linear-gradient(var(--gold),transparent);
+    animation:cue 1.8s ease-in-out infinite;
+  }
+  @keyframes cue{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
+
+  /* ---------- station 2 · tunnel interlude ---------- */
+  #tunnel{min-height:120vh;justify-content:flex-end;text-align:right}
+  #tunnel .inner{display:flex;justify-content:flex-end}
+  .interlude{
+    max-width:420px;
+    font-family:var(--display);font-weight:600;
+    font-size:clamp(1.1rem,2.2vw,1.6rem);line-height:1.4;color:var(--paper);
+  }
+  .interlude em{font-style:normal;color:var(--ember)}
+
+  /* ---------- station 3 · categories ---------- */
+  #cats{min-height:170vh;align-items:flex-start;padding-top:22vh}
+  .cat-rail{
+    margin-left:auto;max-width:520px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .cat-head{margin-bottom:26px}
+  .cat{
+    display:grid;grid-template-columns:44px 1fr auto;gap:18px;align-items:center;
+    padding:20px 22px;
+    background:var(--glass);
+    border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:border-color .3s,transform .3s;
+  }
+  .cat:hover{border-color:var(--gold);transform:translateX(-8px)}
+  .cat .idx{
+    font-family:var(--display);font-weight:600;font-size:.8rem;color:var(--gold);
+  }
+  .cat h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+  .cat p{color:var(--muted);font-size:.82rem;line-height:1.5}
+  .cat .cnt{
+    font-variant-numeric:tabular-nums;
+    font-size:.78rem;font-weight:700;color:var(--gold-hi);white-space:nowrap;
+  }
+
+  /* ---------- station 4 · games ---------- */
+  #games{min-height:150vh;align-items:flex-start;padding-top:26vh}
+  .games-wrap{max-width:560px;margin-left:auto} /* planets fly on the left */
+  .game-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .chip{
+    display:inline-flex;align-items:baseline;gap:10px;
+    padding:12px 18px;
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-size:.88rem;font-weight:700;cursor:pointer;
+    transition:border-color .25s,color .25s;
+  }
+  .chip small{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+  .chip:hover{border-color:var(--gold);color:var(--gold-hi)}
+
+  /* ---------- station 5 · offers ---------- */
+  #offers{min-height:190vh;align-items:flex-start;padding-top:24vh}
+  .offers-head{max-width:520px;margin-bottom:44px}
+  .offer-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;max-width:1020px;
+  }
+  .offer{
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    padding:22px;display:flex;flex-direction:column;gap:14px;
+    transition:border-color .3s,transform .3s;
+  }
+  .offer:hover{border-color:var(--gold);transform:translateY(-6px)}
+  .offer .top{display:flex;justify-content:space-between;align-items:center}
+  .offer .game{
+    font-size:.68rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gold);
+  }
+  .offer .tag{
+    font-size:.66rem;font-weight:700;letter-spacing:.1em;
+    padding:4px 10px;color:var(--ink);background:var(--ember);
+  }
+  .offer .tag.cold{background:var(--ice)}
+  .offer h4{font-size:.95rem;font-weight:700;line-height:1.45;min-height:2.9em}
+  .offer .seller{
+    display:flex;align-items:center;gap:8px;
+    color:var(--muted);font-size:.78rem;
+  }
+  .offer .dot{width:6px;height:6px;border-radius:50%;background:var(--jade);box-shadow:0 0 8px var(--jade)}
+  .offer .star{color:var(--gold-hi)}
+  .offer .foot{
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:auto;
+  }
+  .offer .price{
+    font-family:var(--display);font-weight:600;font-size:1.05rem;
+    font-variant-numeric:tabular-nums;color:var(--gold-hi);
+  }
+  .offer button{
+    font-family:var(--body);font-weight:700;font-size:.78rem;
+    letter-spacing:.08em;text-transform:uppercase;
+    color:var(--paper);background:none;border:1px solid var(--line);
+    padding:9px 16px;cursor:pointer;transition:all .25s;
+  }
+  .offer button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+
+  /* ---------- station 6 · guarantee steps ---------- */
+  #how{min-height:120vh;align-items:flex-start;padding-top:22vh}
+  .how-rail{max-width:480px;margin-left:auto}
+  .stepline{margin-top:34px;display:flex;flex-direction:column}
+  .step{
+    position:relative;padding:0 0 34px 34px;
+    border-left:1px solid var(--line);
+  }
+  .step:last-child{border-left-color:transparent;padding-bottom:0}
+  .step::before{
+    content:'';position:absolute;left:-5px;top:4px;
+    width:9px;height:9px;background:var(--gold);
+    box-shadow:0 0 14px var(--gold);
+    transform:rotate(45deg);
+  }
+  .step h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
+  .step p{color:var(--muted);font-size:.86rem;line-height:1.65}
+
+  /* ---------- station 7 · gate / cta ---------- */
+  #cta{min-height:110vh;text-align:center}
+  #cta .inner{
+    max-width:760px;padding:70px 60px;
+    background:radial-gradient(closest-side,rgba(5,7,12,.78),rgba(5,7,12,.4) 65%,transparent);
+  }
+  #cta h2,#cta .lead{text-shadow:0 2px 24px rgba(5,7,12,.9)}
+  #cta h2{font-size:clamp(1.8rem,4vw,3.2rem)}
+  #cta .lead{margin:0 auto 40px}
+
+  footer{
+    position:relative;z-index:1;
+    display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+    padding:34px 5vw;border-top:1px solid var(--line);
+    background:rgba(5,7,12,.8);backdrop-filter:blur(10px);
+    color:var(--muted);font-size:.8rem;
+  }
+
+  @media (max-width:860px){
+    nav{display:none}
+    #hero .inner{grid-template-columns:1fr}
+    #tunnel{justify-content:flex-start;text-align:left}
+    #tunnel .inner{justify-content:flex-start}
+    .cat-rail,.how-rail{margin-left:0}
+    .station{padding-top:16vh}
+  }
+</style>
+</head>
+<body>
+
+<div id="flightbar"></div>
+<canvas id="gl"></canvas>
+
+<header>
+  <a class="logo" href="#hero">KRAV<b>LER</b></a>
+  <nav>
+    <a href="#cats">Категории</a>
+    <a href="#games">Игры</a>
+    <a href="#offers">Лоты</a>
+    <a href="#how">Гарантия</a>
+  </nav>
+  <a class="btn btn-line" href="#cta">Продавать</a>
+</header>
+
+<main>
+
+  <!-- station 1 · crystal -->
+  <section class="station" id="hero">
+    <div class="inner">
+      <div>
+        <div class="eyebrow reveal">Маркетплейс игровых ценностей</div>
+        <h1 class="reveal">Всё золото<br>игровых миров —<br><span class="outline">в одном</span> <span class="gold">полёте</span></h1>
+        <p class="lead reveal">Аккаунты, ключи, валюта и буст для пяти сотен игр.
+          Прокрути страницу — и пролети через каталог: от первой сделки до золотых ворот гаранта.</p>
+        <div class="hero-cta reveal">
+          <a class="btn" href="#cats">Начать полёт</a>
+          <a class="btn btn-line" href="#offers">Сразу к лотам</a>
+        </div>
+        <div class="hero-note reveal">
+          <span><b data-count="524">0</b> игр</span><span class="sep">/</span>
+          <span><b data-count="87340">0</b> продавцов</span><span class="sep">/</span>
+          <span><b data-count="2140591">0</b> сделок</span>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-cue">скролль — это тяга</div>
+  </section>
+
+  <!-- station 2 · ember tunnel -->
+  <section class="station" id="tunnel">
+    <div class="inner">
+      <p class="interlude reveal">Каждая сделка проходит <em>сквозь гаранта</em>:
+        деньги заморожены, пока товар не окажется у тебя в руках.</p>
+    </div>
+  </section>
+
+  <!-- station 3 · category islands -->
+  <section class="station" id="cats">
+    <div class="inner">
+      <div class="cat-rail">
+        <div class="cat-head reveal">
+          <div class="eyebrow">Станция I — архипелаг категорий</div>
+          <h2>Шесть островов каталога</h2>
+          <p class="lead">Слева по курсу — острова. Каждый хранит свой тип товара.</p>
+        </div>
+        <div class="cat reveal"><span class="idx">01</span><div><h3>Игровая валюта</h3><p>Голда, гемы и кристаллы по живому курсу</p></div><span class="cnt">15 340</span></div>
+        <div class="cat reveal"><span class="idx">02</span><div><h3>Ключи и пины</h3><p>Steam, EA, Ubisoft — лицензии и гифты</p></div><span class="cnt">8 920</span></div>
+        <div class="cat reveal"><span class="idx">03</span><div><h3>Аккаунты</h3><p>Прокачанные профили с редкими коллекциями</p></div><span class="cnt">12 480</span></div>
+        <div class="cat reveal"><span class="idx">04</span><div><h3>Буст и прокачка</h3><p>Рейтинг, калибровка и фарм от топ-игроков</p></div><span class="cnt">4 210</span></div>
+        <div class="cat reveal"><span class="idx">05</span><div><h3>Предметы и скины</h3><p>Ножи, арканы и коллекционные вещи</p></div><span class="cnt">9 880</span></div>
+        <div class="cat reveal"><span class="idx">06</span><div><h3>Донат и пополнение</h3><p>Пополнение баланса в любом регионе</p></div><span class="cnt">6 750</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- station 4 · game planets -->
+  <section class="station" id="games">
+    <div class="inner">
+      <div class="games-wrap">
+        <div class="eyebrow reveal">Станция II — система игр</div>
+        <h2 class="reveal">524 игры на орбите</h2>
+        <p class="lead reveal">Вокруг ядра каталога вращаются миры — от CS2 до Genshin.
+          Выбери свой.</p>
+        <div class="game-list reveal">
+          <span class="chip">CS2 <small>34 120</small></span>
+          <span class="chip">Roblox <small>31 022</small></span>
+          <span class="chip">Genshin Impact <small>27 651</small></span>
+          <span class="chip">Dota 2 <small>21 480</small></span>
+          <span class="chip">Brawl Stars <small>19 384</small></span>
+          <span class="chip">Fortnite <small>18 903</small></span>
+          <span class="chip">Valorant <small>15 208</small></span>
+          <span class="chip">Minecraft <small>12 745</small></span>
+          <span class="chip">WoW <small>11 490</small></span>
+          <span class="chip">Steam <small>9 340</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- station 5 · vault of crates -->
+  <section class="station" id="offers">
+    <div class="inner">
+      <div class="offers-head reveal">
+        <div class="eyebrow">Станция III — хранилище лотов</div>
+        <h2>Горячие предложения</h2>
+        <p class="lead">Контейнеры вокруг — живые лоты продавцов, которые сейчас онлайн.</p>
+      </div>
+      <div class="offer-grid" id="offerGrid"></div>
+    </div>
+  </section>
+
+  <!-- station 6 · guarantee -->
+  <section class="station" id="how">
+    <div class="inner">
+      <div class="how-rail">
+        <div class="eyebrow reveal">Перед воротами — досмотр</div>
+        <h2 class="reveal">Как работает гарант</h2>
+        <div class="stepline">
+          <div class="step reveal"><h3>Выбираешь лот</h3><p>Сравниваешь продавцов по цене, рейтингу и скорости — все отзывы настоящие, их нельзя купить.</p></div>
+          <div class="step reveal"><h3>Платишь в заморозку</h3><p>Деньги ложатся на счёт гаранта. Продавец видит оплату, но не может её забрать.</p></div>
+          <div class="step reveal"><h3>Получаешь и подтверждаешь</h3><p>Товар у тебя — жмёшь «подтвердить», гарант отпускает деньги продавцу. Спор? Арбитраж за 24 часа.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- station 7 · golden gate -->
+  <section class="station" id="cta">
+    <div class="inner">
+      <div class="eyebrow reveal" style="justify-content:center">Конечная — золотые ворота</div>
+      <h2 class="reveal">Пролетай — и торгуй</h2>
+      <p class="lead reveal">Первый лот размещается за две минуты. Комиссия — только со свершившейся продажи.</p>
+      <div class="hero-cta reveal" style="justify-content:center">
+        <a class="btn" href="#hero">Стать продавцом</a>
+        <a class="btn btn-line" href="#cats">Пролететь ещё раз</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <a class="logo" href="#hero">KRAV<b>LER</b></a>
+  <span>Демо-концепт: товары и продавцы вымышлены</span>
+  <span>© 2026 KRAVLER</span>
+</footer>
+
+<script src="./app.js"></script>
+<script>
+/* ---------- offers data ---------- */
+(function(){
+  const offers = [
+    {g:'CS2', t:'Аккаунт 5000+ часов, нож Karambit Fade, 12 медалей', s:'ProTrader', r:'4.98', p:'24 900 ₽', tag:'топ'},
+    {g:'Genshin Impact', t:'AR 58, 14 легендарных персонажей, гарант передачи', s:'GenshinGod', r:'4.95', p:'11 500 ₽', tag:'хит'},
+    {g:'Fortnite', t:'1000 V-Bucks — зачисление на аккаунт за 5 минут', s:'FastBucks', r:'5.00', p:'590 ₽', tag:'-20%', cold:true},
+    {g:'CS2', t:'Буст Premier с 15 000 до 20 000 elo, стрим процесса', s:'BoostKing', r:'4.92', p:'3 400 ₽'},
+    {g:'Brawl Stars', t:'2000 гемов официальным донатом через Supercell ID', s:'GemStore', r:'4.99', p:'4 190 ₽', tag:'хит'},
+    {g:'Steam', t:'Ключ Cyberpunk 2077 Ultimate Edition, регион RU/CIS', s:'KeyMaster', r:'4.97', p:'1 890 ₽', tag:'-35%', cold:true},
+    {g:'Roblox', t:'1700 робуксов передачей через группу, без входа в аккаунт', s:'RobloxShop', r:'4.94', p:'1 250 ₽'},
+    {g:'Dota 2', t:'Аркана Phantom Assassin — обмен сразу после оплаты', s:'ArcanaHub', r:'4.96', p:'2 750 ₽', tag:'топ'},
+  ];
+  const grid = document.getElementById('offerGrid');
+  offers.forEach(o=>{
+    const d = document.createElement('div');
+    d.className = 'offer reveal';
+    d.innerHTML = `
+      <div class="top"><span class="game">${o.g}</span>${o.tag?`<span class="tag${o.cold?' cold':''}">${o.tag}</span>`:''}</div>
+      <h4>${o.t}</h4>
+      <div class="seller"><span class="dot"></span>${o.s}<span class="star">★ ${o.r}</span></div>
+      <div class="foot"><span class="price">${o.p}</span><button>Купить</button></div>`;
+    grid.appendChild(d);
+  });
+})();
+
+/* ---------- reveal + counters ---------- */
+(function(){
+  const io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+  },{threshold:.15});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  const fmt = n=>n.toLocaleString('ru-RU');
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const target = +el.dataset.count, t0 = performance.now(), dur = 2200;
+    (function step(now){
+      const k = Math.min((now-t0)/dur,1);
+      el.textContent = fmt(Math.round(target*(1-Math.pow(1-k,3))));
+      if(k<1) requestAnimationFrame(step);
+    })(t0);
+  });
+})();
+</script>
+</body>
+</html>

@@ -3,715 +3,483 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KRAVLER — 3D маркетплейс игровых товаров</title>
+<title>KRAVLER — полёт по маркетплейсу игровых товаров</title>
 <style>
+  /* ---------- fonts ---------- */
+  @font-face{font-family:'Unbounded';font-weight:600;font-display:swap;
+    src:url('./fonts/unbounded-cyrillic-600-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Unbounded';font-weight:600;font-display:swap;
+    src:url('./fonts/unbounded-latin-600-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Unbounded';font-weight:900;font-display:swap;
+    src:url('./fonts/unbounded-cyrillic-900-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Unbounded';font-weight:900;font-display:swap;
+    src:url('./fonts/unbounded-latin-900-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Manrope';font-weight:400;font-display:swap;
+    src:url('./fonts/manrope-cyrillic-400-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Manrope';font-weight:400;font-display:swap;
+    src:url('./fonts/manrope-latin-400-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+  @font-face{font-family:'Manrope';font-weight:700;font-display:swap;
+    src:url('./fonts/manrope-cyrillic-700-normal.woff2') format('woff2');
+    unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Manrope';font-weight:700;font-display:swap;
+    src:url('./fonts/manrope-latin-700-normal.woff2') format('woff2');
+    unicode-range:U+0000-00FF,U+2000-206F}
+
+  /* ---------- tokens ---------- */
   :root{
-    --bg:#07060f;
-    --bg2:#0d0b1e;
-    --card:rgba(255,255,255,.04);
-    --card-border:rgba(255,255,255,.09);
-    --neon1:#8b5cf6;
-    --neon2:#22d3ee;
-    --neon3:#f472b6;
-    --gold:#fbbf24;
-    --text:#e7e5f4;
-    --muted:#9d98bd;
-    --radius:18px;
+    --ink:#05070c;
+    --paper:#ece7da;        /* warm off-white, not pure white */
+    --muted:#8f96ab;
+    --gold:#e8b34b;
+    --gold-hi:#ffd98a;
+    --ember:#ff8a3d;
+    --ice:#9fd0ff;
+    --jade:#63d6b4;
+    --line:rgba(236,231,218,.14);
+    --glass:rgba(10,14,24,.62);
+    --display:'Unbounded',system-ui,sans-serif;
+    --body:'Manrope',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{
-    font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;
-    background:var(--bg);
-    color:var(--text);
+    font-family:var(--body);
+    background:var(--ink);
+    color:var(--paper);
     overflow-x:hidden;
   }
-  ::selection{background:var(--neon1);color:#fff}
+  ::selection{background:var(--gold);color:var(--ink)}
+
+  #gl{position:fixed;inset:0;z-index:0;display:block}
 
   /* ---------- header ---------- */
   header{
-    position:fixed;top:0;left:0;right:0;z-index:100;
+    position:fixed;top:0;left:0;right:0;z-index:50;
     display:flex;align-items:center;justify-content:space-between;
-    padding:14px 4vw;
-    background:rgba(7,6,15,.55);
-    backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);
-    border-bottom:1px solid rgba(255,255,255,.06);
+    padding:18px 4vw;
+  }
+  #flightbar{
+    position:fixed;top:0;left:0;right:0;height:2px;z-index:60;
+    background:linear-gradient(90deg,var(--gold),var(--ember));
+    transform:scaleX(0);transform-origin:left;
   }
   .logo{
-    font-size:1.5rem;font-weight:900;letter-spacing:.12em;
-    background:linear-gradient(90deg,var(--neon2),var(--neon1),var(--neon3));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    text-decoration:none;
-    display:flex;align-items:center;gap:.5rem;
+    font-family:var(--display);font-weight:900;font-size:1.05rem;
+    letter-spacing:.18em;color:var(--paper);text-decoration:none;
   }
-  .logo .cube{
-    width:26px;height:26px;display:inline-block;
-    perspective:120px;
-  }
-  .logo .cube i{
-    display:block;width:100%;height:100%;
-    background:linear-gradient(135deg,var(--neon1),var(--neon2));
-    border-radius:6px;
-    animation:logospin 6s linear infinite;
-    box-shadow:0 0 18px rgba(139,92,246,.8);
-  }
-  @keyframes logospin{
-    0%{transform:rotateY(0) rotateX(15deg)}
-    100%{transform:rotateY(360deg) rotateX(15deg)}
-  }
-  nav{display:flex;gap:26px}
+  .logo b{color:var(--gold)}
+  nav{display:flex;gap:30px}
   nav a{
-    color:var(--muted);text-decoration:none;font-size:.95rem;font-weight:600;
-    transition:color .2s;
+    color:var(--muted);text-decoration:none;
+    font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    transition:color .25s;
   }
-  nav a:hover{color:var(--neon2)}
+  nav a:hover{color:var(--gold-hi)}
   .btn{
-    padding:10px 22px;border-radius:12px;font-weight:700;font-size:.92rem;
-    text-decoration:none;cursor:pointer;border:none;
-    transition:transform .2s,box-shadow .2s;
-    display:inline-block;
+    display:inline-block;padding:13px 28px;
+    font-family:var(--display);font-weight:600;font-size:.78rem;letter-spacing:.1em;
+    text-decoration:none;text-transform:uppercase;cursor:pointer;border:none;
+    color:var(--ink);background:var(--gold);
+    clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    transition:background .25s,transform .25s;
   }
-  .btn-primary{
-    background:linear-gradient(90deg,var(--neon1),var(--neon2));
-    color:#0a0918;
-    box-shadow:0 0 24px rgba(139,92,246,.45);
+  .btn:hover{background:var(--gold-hi);transform:translateY(-2px)}
+  .btn-line{
+    background:transparent;color:var(--paper);
+    box-shadow:inset 0 0 0 1px var(--line);
   }
-  .btn-primary:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 38px rgba(34,211,238,.6)}
-  .btn-ghost{
-    background:transparent;color:var(--text);
-    border:1px solid rgba(255,255,255,.18);
-  }
-  .btn-ghost:hover{border-color:var(--neon2);color:var(--neon2)}
+  .btn-line:hover{background:rgba(236,231,218,.08);color:var(--gold-hi)}
+  .btn:focus-visible,nav a:focus-visible,.logo:focus-visible{outline:2px solid var(--gold-hi);outline-offset:3px}
 
-  /* ---------- hero ---------- */
-  #hero{
-    position:relative;min-height:100vh;
-    display:flex;align-items:center;justify-content:center;
-    overflow:hidden;
+  /* ---------- flight layout ----------
+     each .station is a stop along the camera route */
+  main{position:relative;z-index:1}
+  .station{
+    position:relative;
+    display:flex;align-items:center;
+    padding:0 5vw;
   }
-  #scene{position:absolute;inset:0;z-index:0}
-  .hero-content{
-    position:relative;z-index:2;text-align:center;
-    padding:120px 20px 60px;max-width:900px;
-    pointer-events:none;
-  }
-  .hero-content > *{pointer-events:auto}
-  .hero-badge{
-    display:inline-block;padding:7px 18px;border-radius:100px;
-    border:1px solid rgba(139,92,246,.5);
-    background:rgba(139,92,246,.12);
-    color:#c4b5fd;font-size:.85rem;font-weight:600;letter-spacing:.05em;
-    margin-bottom:26px;
-    animation:pulse-badge 3s ease-in-out infinite;
-  }
-  @keyframes pulse-badge{
-    0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,.35)}
-    50%{box-shadow:0 0 24px 4px rgba(139,92,246,.35)}
-  }
-  h1{
-    font-size:clamp(2.4rem,6vw,4.6rem);
-    font-weight:900;line-height:1.08;letter-spacing:-.01em;
-    margin-bottom:22px;
-  }
-  h1 .grad{
-    background:linear-gradient(90deg,var(--neon2) 0%,var(--neon1) 50%,var(--neon3) 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 0 26px rgba(139,92,246,.45));
-  }
-  .hero-sub{
-    color:var(--muted);font-size:clamp(1rem,2vw,1.2rem);
-    max-width:640px;margin:0 auto 36px;line-height:1.65;
-  }
-  .search{
-    display:flex;max-width:600px;margin:0 auto 40px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.14);
-    border-radius:16px;overflow:hidden;
-    backdrop-filter:blur(10px);
-    transition:border-color .25s, box-shadow .25s;
-  }
-  .search:focus-within{border-color:var(--neon2);box-shadow:0 0 30px rgba(34,211,238,.25)}
-  .search input{
-    flex:1;background:transparent;border:none;outline:none;
-    padding:16px 22px;color:var(--text);font-size:1rem;
-  }
-  .search input::placeholder{color:#6f6a92}
-  .search button{
-    background:linear-gradient(90deg,var(--neon1),var(--neon2));
-    border:none;color:#0a0918;font-weight:800;font-size:.95rem;
-    padding:0 30px;cursor:pointer;transition:filter .2s;
-  }
-  .search button:hover{filter:brightness(1.15)}
-  .hero-stats{
-    display:flex;gap:clamp(20px,5vw,64px);justify-content:center;flex-wrap:wrap;
-  }
-  .stat{text-align:center}
-  .stat b{
-    display:block;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;
-    background:linear-gradient(180deg,#fff,#a5b4fc);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .stat span{color:var(--muted);font-size:.85rem}
-  .scroll-hint{
-    position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
-    z-index:2;color:var(--muted);font-size:.8rem;letter-spacing:.2em;
-    animation:hint 2s ease-in-out infinite;
-  }
-  @keyframes hint{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,10px)}}
+  .station .inner{width:100%;max-width:1280px;margin:0 auto}
 
-  /* ---------- sections ---------- */
-  section{padding:90px 4vw;position:relative}
-  .section-head{text-align:center;margin-bottom:56px}
-  .section-head h2{
-    font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;margin-bottom:14px;
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:.72rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:22px;
   }
-  .section-head h2 em{
-    font-style:normal;
-    background:linear-gradient(90deg,var(--neon2),var(--neon1));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .section-head p{color:var(--muted);max-width:560px;margin:0 auto;line-height:1.6}
+  .eyebrow::before{content:'';width:34px;height:1px;background:var(--gold)}
+  h1,h2{font-family:var(--display);text-wrap:balance}
+  h2{font-size:clamp(1.5rem,3.4vw,2.6rem);font-weight:900;line-height:1.15;margin-bottom:16px}
+  .lead{color:var(--muted);line-height:1.7;max-width:46ch}
 
-  /* reveal on scroll */
-  .reveal{opacity:0;transform:translateY(46px);transition:opacity .8s ease,transform .8s ease}
+  /* reveal */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease}
   .reveal.on{opacity:1;transform:none}
-
-  /* ---------- categories ---------- */
-  .cat-grid{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:22px;max-width:1200px;margin:0 auto;
+  @media (prefers-reduced-motion:reduce){
+    .reveal{transition:none;opacity:1;transform:none}
+    html{scroll-behavior:auto}
   }
+
+  /* ---------- station 1 · hero ---------- */
+  #hero{min-height:100vh}
+  #hero .inner{display:grid;grid-template-columns:minmax(0,620px) 1fr}
+  h1{
+    font-size:clamp(2rem,5.2vw,4rem);font-weight:900;line-height:1.06;
+    margin-bottom:26px;
+  }
+  h1 .gold{color:var(--gold)}
+  h1 .outline{
+    color:transparent;
+    -webkit-text-stroke:1.5px rgba(236,231,218,.8);
+  }
+  .hero-note{
+    display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;
+    margin-top:38px;color:var(--muted);font-size:.85rem;
+  }
+  .hero-note b{
+    font-family:var(--display);font-weight:600;font-size:1.5rem;color:var(--paper);
+    font-variant-numeric:tabular-nums;
+  }
+  .hero-note .sep{color:rgba(236,231,218,.25)}
+  .hero-cta{display:flex;gap:16px;margin-top:34px;flex-wrap:wrap}
+  .scroll-cue{
+    position:absolute;bottom:30px;left:5vw;
+    display:flex;align-items:center;gap:12px;
+    color:var(--muted);font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+  }
+  .scroll-cue::after{
+    content:'';width:1px;height:44px;background:linear-gradient(var(--gold),transparent);
+    animation:cue 1.8s ease-in-out infinite;
+  }
+  @keyframes cue{0%,100%{transform:scaleY(.4);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}}
+
+  /* ---------- station 2 · tunnel interlude ---------- */
+  #tunnel{min-height:120vh;justify-content:flex-end;text-align:right}
+  #tunnel .inner{display:flex;justify-content:flex-end}
+  .interlude{
+    max-width:420px;
+    font-family:var(--display);font-weight:600;
+    font-size:clamp(1.1rem,2.2vw,1.6rem);line-height:1.4;color:var(--paper);
+  }
+  .interlude em{font-style:normal;color:var(--ember)}
+
+  /* ---------- station 3 · categories ---------- */
+  #cats{min-height:170vh;align-items:flex-start;padding-top:22vh}
+  .cat-rail{
+    margin-left:auto;max-width:520px;
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .cat-head{margin-bottom:26px}
   .cat{
-    position:relative;padding:34px 28px;border-radius:var(--radius);
-    background:var(--card);border:1px solid var(--card-border);
-    cursor:pointer;overflow:hidden;
-    transform-style:preserve-3d;
-    transition:border-color .3s;
-    will-change:transform;
+    display:grid;grid-template-columns:44px 1fr auto;gap:18px;align-items:center;
+    padding:20px 22px;
+    background:var(--glass);
+    border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:border-color .3s,transform .3s;
   }
-  .cat::before{
-    content:'';position:absolute;inset:0;
-    background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,.18),transparent 45%);
-    opacity:0;transition:opacity .3s;
+  .cat:hover{border-color:var(--gold);transform:translateX(-8px)}
+  .cat .idx{
+    font-family:var(--display);font-weight:600;font-size:.8rem;color:var(--gold);
   }
-  .cat:hover::before{opacity:1}
-  .cat:hover{border-color:rgba(139,92,246,.55)}
-  .cat .ico{
-    width:62px;height:62px;border-radius:16px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.9rem;margin-bottom:20px;
-    background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(34,211,238,.18));
-    border:1px solid rgba(139,92,246,.35);
-    transform:translateZ(40px);
-  }
-  .cat h3{font-size:1.15rem;margin-bottom:8px;transform:translateZ(30px)}
-  .cat p{color:var(--muted);font-size:.88rem;line-height:1.55;transform:translateZ(20px)}
+  .cat h3{font-size:1rem;font-weight:700;margin-bottom:4px}
+  .cat p{color:var(--muted);font-size:.82rem;line-height:1.5}
   .cat .cnt{
-    position:absolute;top:22px;right:22px;
-    font-size:.75rem;font-weight:700;color:var(--neon2);
-    background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);
-    padding:4px 12px;border-radius:100px;
+    font-variant-numeric:tabular-nums;
+    font-size:.78rem;font-weight:700;color:var(--gold-hi);white-space:nowrap;
   }
 
-  /* ---------- 3D carousel ---------- */
-  #games{overflow:hidden}
-  .carousel-stage{
-    height:380px;display:flex;align-items:center;justify-content:center;
-    perspective:1400px;margin-top:-10px;
+  /* ---------- station 4 · games ---------- */
+  #games{min-height:150vh;align-items:flex-start;padding-top:26vh}
+  .games-wrap{max-width:560px;margin-left:auto} /* planets fly on the left */
+  .game-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+  .chip{
+    display:inline-flex;align-items:baseline;gap:10px;
+    padding:12px 18px;
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    font-size:.88rem;font-weight:700;cursor:pointer;
+    transition:border-color .25s,color .25s;
   }
-  .carousel{
-    position:relative;width:230px;height:300px;
-    transform-style:preserve-3d;
-    animation:carousel-spin 36s linear infinite;
-  }
-  .carousel:hover{animation-play-state:paused}
-  @keyframes carousel-spin{
-    from{transform:rotateY(0deg)}
-    to{transform:rotateY(-360deg)}
-  }
-  .game-card{
-    position:absolute;inset:0;
-    border-radius:20px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    border:1px solid rgba(255,255,255,.15);
-    box-shadow:0 20px 60px rgba(0,0,0,.55), inset 0 0 60px rgba(255,255,255,.04);
-    backdrop-filter:blur(4px);
-    cursor:pointer;
-    transition:filter .3s;
-  }
-  .game-card:hover{filter:brightness(1.25)}
-  .game-card .emoji{font-size:4rem;filter:drop-shadow(0 8px 18px rgba(0,0,0,.5))}
-  .game-card b{font-size:1.15rem;font-weight:800}
-  .game-card span{font-size:.8rem;color:rgba(255,255,255,.75)}
+  .chip small{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+  .chip:hover{border-color:var(--gold);color:var(--gold-hi)}
 
-  /* ---------- offers ---------- */
+  /* ---------- station 5 · offers ---------- */
+  #offers{min-height:190vh;align-items:flex-start;padding-top:24vh}
+  .offers-head{max-width:520px;margin-bottom:44px}
   .offer-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
-    gap:22px;max-width:1250px;margin:0 auto;
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:16px;max-width:1020px;
   }
   .offer{
-    border-radius:var(--radius);
-    background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
-    border:1px solid var(--card-border);
-    overflow:hidden;
-    transform-style:preserve-3d;
-    transition:border-color .3s,box-shadow .3s;
-    will-change:transform;
+    background:var(--glass);border:1px solid var(--line);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    padding:22px;display:flex;flex-direction:column;gap:14px;
+    transition:border-color .3s,transform .3s;
   }
-  .offer:hover{
-    border-color:rgba(34,211,238,.5);
-    box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 40px rgba(34,211,238,.12);
+  .offer:hover{border-color:var(--gold);transform:translateY(-6px)}
+  .offer .top{display:flex;justify-content:space-between;align-items:center}
+  .offer .game{
+    font-size:.68rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--gold);
   }
-  .offer .cover{
-    height:130px;position:relative;
-    display:flex;align-items:center;justify-content:center;
-    font-size:3.2rem;
-  }
-  .offer .cover::after{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,transparent 40%,rgba(13,11,30,.9));
-  }
-  .offer .cover .emoji{position:relative;z-index:1;filter:drop-shadow(0 10px 20px rgba(0,0,0,.6));transform:translateZ(30px)}
   .offer .tag{
-    position:absolute;top:12px;left:12px;z-index:2;
-    font-size:.7rem;font-weight:800;letter-spacing:.06em;
-    padding:5px 12px;border-radius:100px;
-    background:rgba(244,114,182,.9);color:#fff;
+    font-size:.66rem;font-weight:700;letter-spacing:.1em;
+    padding:4px 10px;color:var(--ink);background:var(--ember);
   }
-  .offer .body{padding:18px 20px 22px}
-  .offer h4{font-size:1rem;line-height:1.4;margin-bottom:10px;transform:translateZ(20px)}
+  .offer .tag.cold{background:var(--ice)}
+  .offer h4{font-size:.95rem;font-weight:700;line-height:1.45;min-height:2.9em}
   .offer .seller{
-    display:flex;align-items:center;gap:9px;margin-bottom:14px;
-    color:var(--muted);font-size:.82rem;
+    display:flex;align-items:center;gap:8px;
+    color:var(--muted);font-size:.78rem;
   }
-  .offer .ava{
-    width:26px;height:26px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:.7rem;font-weight:800;color:#0a0918;
-    background:linear-gradient(135deg,var(--neon2),var(--neon1));
+  .offer .dot{width:6px;height:6px;border-radius:50%;background:var(--jade);box-shadow:0 0 8px var(--jade)}
+  .offer .star{color:var(--gold-hi)}
+  .offer .foot{
+    display:flex;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:auto;
   }
-  .offer .rate{color:var(--gold)}
-  .offer .online{
-    width:7px;height:7px;border-radius:50%;background:#34d399;
-    box-shadow:0 0 8px #34d399;display:inline-block;
-  }
-  .offer .foot{display:flex;align-items:center;justify-content:space-between}
   .offer .price{
-    font-size:1.25rem;font-weight:900;
-    background:linear-gradient(90deg,#fff,#a5f3fc);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
+    font-family:var(--display);font-weight:600;font-size:1.05rem;
+    font-variant-numeric:tabular-nums;color:var(--gold-hi);
   }
-  .offer .buy{
-    padding:9px 18px;border-radius:10px;border:none;cursor:pointer;
-    font-weight:800;font-size:.85rem;
-    background:linear-gradient(90deg,var(--neon1),var(--neon2));color:#0a0918;
-    transition:transform .2s,box-shadow .2s;
+  .offer button{
+    font-family:var(--body);font-weight:700;font-size:.78rem;
+    letter-spacing:.08em;text-transform:uppercase;
+    color:var(--paper);background:none;border:1px solid var(--line);
+    padding:9px 16px;cursor:pointer;transition:all .25s;
   }
-  .offer .buy:hover{transform:scale(1.07);box-shadow:0 0 22px rgba(34,211,238,.5)}
+  .offer button:hover{background:var(--gold);border-color:var(--gold);color:var(--ink)}
 
-  /* ---------- steps ---------- */
-  .steps{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:24px;max-width:1100px;margin:0 auto;
-  }
+  /* ---------- station 6 · guarantee steps ---------- */
+  #how{min-height:120vh;align-items:flex-start;padding-top:22vh}
+  .how-rail{max-width:480px;margin-left:auto}
+  .stepline{margin-top:34px;display:flex;flex-direction:column}
   .step{
-    position:relative;padding:36px 28px;border-radius:var(--radius);
-    background:var(--card);border:1px solid var(--card-border);
-    text-align:center;
+    position:relative;padding:0 0 34px 34px;
+    border-left:1px solid var(--line);
   }
-  .step .num{
-    width:56px;height:56px;margin:0 auto 20px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    font-size:1.3rem;font-weight:900;color:#0a0918;
-    background:linear-gradient(135deg,var(--neon2),var(--neon1));
-    box-shadow:0 0 30px rgba(139,92,246,.5);
+  .step:last-child{border-left-color:transparent;padding-bottom:0}
+  .step::before{
+    content:'';position:absolute;left:-5px;top:4px;
+    width:9px;height:9px;background:var(--gold);
+    box-shadow:0 0 14px var(--gold);
+    transform:rotate(45deg);
   }
-  .step h3{margin-bottom:10px;font-size:1.1rem}
-  .step p{color:var(--muted);font-size:.9rem;line-height:1.6}
+  .step h3{font-size:.95rem;font-weight:700;margin-bottom:8px}
+  .step p{color:var(--muted);font-size:.86rem;line-height:1.65}
 
-  /* ---------- cta ---------- */
-  .cta{
-    max-width:1000px;margin:0 auto;text-align:center;
-    padding:70px 30px;border-radius:28px;
-    background:
-      radial-gradient(700px 300px at 20% 0%,rgba(139,92,246,.28),transparent),
-      radial-gradient(700px 300px at 80% 100%,rgba(34,211,238,.2),transparent),
-      rgba(255,255,255,.03);
-    border:1px solid rgba(139,92,246,.3);
+  /* ---------- station 7 · gate / cta ---------- */
+  #cta{min-height:110vh;text-align:center}
+  #cta .inner{
+    max-width:760px;padding:70px 60px;
+    background:radial-gradient(closest-side,rgba(5,7,12,.78),rgba(5,7,12,.4) 65%,transparent);
   }
-  .cta h2{font-size:clamp(1.7rem,3.5vw,2.5rem);margin-bottom:16px}
-  .cta p{color:var(--muted);margin-bottom:32px}
+  #cta h2,#cta .lead{text-shadow:0 2px 24px rgba(5,7,12,.9)}
+  #cta h2{font-size:clamp(1.8rem,4vw,3.2rem)}
+  #cta .lead{margin:0 auto 40px}
 
   footer{
-    border-top:1px solid rgba(255,255,255,.06);
-    padding:40px 4vw;text-align:center;color:var(--muted);font-size:.85rem;
+    position:relative;z-index:1;
+    display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+    padding:34px 5vw;border-top:1px solid var(--line);
+    background:rgba(5,7,12,.8);backdrop-filter:blur(10px);
+    color:var(--muted);font-size:.8rem;
   }
-  footer .logo{justify-content:center;margin-bottom:12px;font-size:1.15rem}
 
-  @media(max-width:760px){
+  @media (max-width:860px){
     nav{display:none}
-    .carousel-stage{perspective:900px}
+    #hero .inner{grid-template-columns:1fr}
+    #tunnel{justify-content:flex-start;text-align:left}
+    #tunnel .inner{justify-content:flex-start}
+    .cat-rail,.how-rail{margin-left:0}
+    .station{padding-top:16vh}
   }
 </style>
 </head>
 <body>
 
+<div id="flightbar"></div>
+<canvas id="gl"></canvas>
+
 <header>
-  <a class="logo" href="#hero"><span class="cube"><i></i></span>KRAVLER</a>
+  <a class="logo" href="#hero">KRAV<b>LER</b></a>
   <nav>
     <a href="#cats">Категории</a>
     <a href="#games">Игры</a>
-    <a href="#offers">Товары</a>
-    <a href="#how">Как это работает</a>
+    <a href="#offers">Лоты</a>
+    <a href="#how">Гарантия</a>
   </nav>
-  <a class="btn btn-primary" href="#offers">Начать продавать</a>
+  <a class="btn btn-line" href="#cta">Продавать</a>
 </header>
 
-<!-- ================= HERO ================= -->
-<div id="hero">
-  <div id="scene"></div>
-  <div class="hero-content">
-    <div class="hero-badge">⚡ Более 2 000 000 сделок под защитой</div>
-    <h1>Маркетплейс игровых товаров<br><span class="grad">в новом измерении</span></h1>
-    <p class="hero-sub">Аккаунты, ключи, валюта, буст и донат для 500+ игр.
-      Мгновенная доставка, безопасная сделка и живые продавцы онлайн 24/7.</p>
-    <div class="search">
-      <input type="text" placeholder="Найти игру или товар: CS2, Genshin, Fortnite…">
-      <button>Поиск</button>
+<main>
+
+  <!-- station 1 · crystal -->
+  <section class="station" id="hero">
+    <div class="inner">
+      <div>
+        <div class="eyebrow reveal">Маркетплейс игровых ценностей</div>
+        <h1 class="reveal">Всё золото<br>игровых миров —<br><span class="outline">в одном</span> <span class="gold">полёте</span></h1>
+        <p class="lead reveal">Аккаунты, ключи, валюта и буст для пяти сотен игр.
+          Прокрути страницу — и пролети через каталог: от первой сделки до золотых ворот гаранта.</p>
+        <div class="hero-cta reveal">
+          <a class="btn" href="#cats">Начать полёт</a>
+          <a class="btn btn-line" href="#offers">Сразу к лотам</a>
+        </div>
+        <div class="hero-note reveal">
+          <span><b data-count="524">0</b> игр</span><span class="sep">/</span>
+          <span><b data-count="87340">0</b> продавцов</span><span class="sep">/</span>
+          <span><b data-count="2140591">0</b> сделок</span>
+        </div>
+      </div>
     </div>
-    <div class="hero-stats">
-      <div class="stat"><b data-count="524">0</b><span>игр в каталоге</span></div>
-      <div class="stat"><b data-count="87340">0</b><span>продавцов онлайн</span></div>
-      <div class="stat"><b data-count="2140591">0</b><span>завершённых сделок</span></div>
-      <div class="stat"><b data-count="99">0</b><span>% положительных отзывов</span></div>
+    <div class="scroll-cue">скролль — это тяга</div>
+  </section>
+
+  <!-- station 2 · ember tunnel -->
+  <section class="station" id="tunnel">
+    <div class="inner">
+      <p class="interlude reveal">Каждая сделка проходит <em>сквозь гаранта</em>:
+        деньги заморожены, пока товар не окажется у тебя в руках.</p>
     </div>
-  </div>
-  <div class="scroll-hint">ЛИСТАЙ ВНИЗ ▾</div>
-</div>
+  </section>
 
-<!-- ================= CATEGORIES ================= -->
-<section id="cats">
-  <div class="section-head reveal">
-    <h2>Категории <em>товаров</em></h2>
-    <p>Всё, что нужно геймеру — в одном месте. Наведи на карточку и почувствуй объём.</p>
-  </div>
-  <div class="cat-grid">
-    <div class="cat reveal" data-tilt><span class="cnt">12 480</span><div class="ico">🎮</div><h3>Аккаунты</h3><p>Прокачанные аккаунты с редкими скинами, героями и достижениями</p></div>
-    <div class="cat reveal" data-tilt><span class="cnt">8 920</span><div class="ico">🔑</div><h3>Ключи и пины</h3><p>Лицензионные ключи Steam, EA, Ubisoft и подарочные карты</p></div>
-    <div class="cat reveal" data-tilt><span class="cnt">15 340</span><div class="ico">💎</div><h3>Игровая валюта</h3><p>Голда, гемы, кристаллы и V-Bucks по лучшему курсу</p></div>
-    <div class="cat reveal" data-tilt><span class="cnt">4 210</span><div class="ico">🚀</div><h3>Буст и прокачка</h3><p>Поднятие рейтинга, калибровка и фарм от топовых игроков</p></div>
-    <div class="cat reveal" data-tilt><span class="cnt">6 750</span><div class="ico">🎁</div><h3>Донат и пополнение</h3><p>Пополнение внутриигрового баланса в любых регионах</p></div>
-    <div class="cat reveal" data-tilt><span class="cnt">9 880</span><div class="ico">⚔️</div><h3>Предметы и скины</h3><p>Ножи, перчатки, арканы и коллекционные предметы</p></div>
-  </div>
-</section>
+  <!-- station 3 · category islands -->
+  <section class="station" id="cats">
+    <div class="inner">
+      <div class="cat-rail">
+        <div class="cat-head reveal">
+          <div class="eyebrow">Станция I — архипелаг категорий</div>
+          <h2>Шесть островов каталога</h2>
+          <p class="lead">Слева по курсу — острова. Каждый хранит свой тип товара.</p>
+        </div>
+        <div class="cat reveal"><span class="idx">01</span><div><h3>Игровая валюта</h3><p>Голда, гемы и кристаллы по живому курсу</p></div><span class="cnt">15 340</span></div>
+        <div class="cat reveal"><span class="idx">02</span><div><h3>Ключи и пины</h3><p>Steam, EA, Ubisoft — лицензии и гифты</p></div><span class="cnt">8 920</span></div>
+        <div class="cat reveal"><span class="idx">03</span><div><h3>Аккаунты</h3><p>Прокачанные профили с редкими коллекциями</p></div><span class="cnt">12 480</span></div>
+        <div class="cat reveal"><span class="idx">04</span><div><h3>Буст и прокачка</h3><p>Рейтинг, калибровка и фарм от топ-игроков</p></div><span class="cnt">4 210</span></div>
+        <div class="cat reveal"><span class="idx">05</span><div><h3>Предметы и скины</h3><p>Ножи, арканы и коллекционные вещи</p></div><span class="cnt">9 880</span></div>
+        <div class="cat reveal"><span class="idx">06</span><div><h3>Донат и пополнение</h3><p>Пополнение баланса в любом регионе</p></div><span class="cnt">6 750</span></div>
+      </div>
+    </div>
+  </section>
 
-<!-- ================= GAMES CAROUSEL ================= -->
-<section id="games">
-  <div class="section-head reveal">
-    <h2>Популярные <em>игры</em></h2>
-    <p>Вращающаяся витрина — карусель в настоящем 3D. Наведи, чтобы остановить.</p>
-  </div>
-  <div class="carousel-stage reveal">
-    <div class="carousel" id="carousel"></div>
-  </div>
-</section>
+  <!-- station 4 · game planets -->
+  <section class="station" id="games">
+    <div class="inner">
+      <div class="games-wrap">
+        <div class="eyebrow reveal">Станция II — система игр</div>
+        <h2 class="reveal">524 игры на орбите</h2>
+        <p class="lead reveal">Вокруг ядра каталога вращаются миры — от CS2 до Genshin.
+          Выбери свой.</p>
+        <div class="game-list reveal">
+          <span class="chip">CS2 <small>34 120</small></span>
+          <span class="chip">Roblox <small>31 022</small></span>
+          <span class="chip">Genshin Impact <small>27 651</small></span>
+          <span class="chip">Dota 2 <small>21 480</small></span>
+          <span class="chip">Brawl Stars <small>19 384</small></span>
+          <span class="chip">Fortnite <small>18 903</small></span>
+          <span class="chip">Valorant <small>15 208</small></span>
+          <span class="chip">Minecraft <small>12 745</small></span>
+          <span class="chip">WoW <small>11 490</small></span>
+          <span class="chip">Steam <small>9 340</small></span>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ================= OFFERS ================= -->
-<section id="offers">
-  <div class="section-head reveal">
-    <h2>Горячие <em>предложения</em></h2>
-    <p>Товары от проверенных продавцов с моментальной доставкой.</p>
-  </div>
-  <div class="offer-grid" id="offerGrid"></div>
-</section>
+  <!-- station 5 · vault of crates -->
+  <section class="station" id="offers">
+    <div class="inner">
+      <div class="offers-head reveal">
+        <div class="eyebrow">Станция III — хранилище лотов</div>
+        <h2>Горячие предложения</h2>
+        <p class="lead">Контейнеры вокруг — живые лоты продавцов, которые сейчас онлайн.</p>
+      </div>
+      <div class="offer-grid" id="offerGrid"></div>
+    </div>
+  </section>
 
-<!-- ================= HOW ================= -->
-<section id="how">
-  <div class="section-head reveal">
-    <h2>Как это <em>работает</em></h2>
-    <p>Три шага до покупки. Деньги продавец получит только после того, как ты подтвердишь получение товара.</p>
-  </div>
-  <div class="steps">
-    <div class="step reveal"><div class="num">1</div><h3>Выбери товар</h3><p>Найди нужную игру и сравни предложения продавцов по цене, рейтингу и отзывам.</p></div>
-    <div class="step reveal"><div class="num">2</div><h3>Оплати безопасно</h3><p>Деньги замораживаются на счёте гаранта — продавец не получит их, пока ты не получишь товар.</p></div>
-    <div class="step reveal"><div class="num">3</div><h3>Получи и подтверди</h3><p>Продавец передаёт товар в чате. Подтверди сделку — и оставь отзыв.</p></div>
-  </div>
-</section>
+  <!-- station 6 · guarantee -->
+  <section class="station" id="how">
+    <div class="inner">
+      <div class="how-rail">
+        <div class="eyebrow reveal">Перед воротами — досмотр</div>
+        <h2 class="reveal">Как работает гарант</h2>
+        <div class="stepline">
+          <div class="step reveal"><h3>Выбираешь лот</h3><p>Сравниваешь продавцов по цене, рейтингу и скорости — все отзывы настоящие, их нельзя купить.</p></div>
+          <div class="step reveal"><h3>Платишь в заморозку</h3><p>Деньги ложатся на счёт гаранта. Продавец видит оплату, но не может её забрать.</p></div>
+          <div class="step reveal"><h3>Получаешь и подтверждаешь</h3><p>Товар у тебя — жмёшь «подтвердить», гарант отпускает деньги продавцу. Спор? Арбитраж за 24 часа.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- ================= CTA ================= -->
-<section>
-  <div class="cta reveal">
-    <h2>Готов зарабатывать на играх?</h2>
-    <p>Размести первый товар за 2 минуты. Комиссия — только с продажи.</p>
-    <a class="btn btn-primary" href="#hero" style="margin-right:14px">Стать продавцом</a>
-    <a class="btn btn-ghost" href="#cats">Смотреть каталог</a>
-  </div>
-</section>
+  <!-- station 7 · golden gate -->
+  <section class="station" id="cta">
+    <div class="inner">
+      <div class="eyebrow reveal" style="justify-content:center">Конечная — золотые ворота</div>
+      <h2 class="reveal">Пролетай — и торгуй</h2>
+      <p class="lead reveal">Первый лот размещается за две минуты. Комиссия — только со свершившейся продажи.</p>
+      <div class="hero-cta reveal" style="justify-content:center">
+        <a class="btn" href="#hero">Стать продавцом</a>
+        <a class="btn btn-line" href="#cats">Пролететь ещё раз</a>
+      </div>
+    </div>
+  </section>
+
+</main>
 
 <footer>
-  <a class="logo" href="#hero"><span class="cube"><i></i></span>KRAVLER</a>
-  <p>© 2026 KRAVLER — 3D-маркетплейс игровых товаров. Демо-концепт: все товары и продавцы вымышлены.</p>
+  <a class="logo" href="#hero">KRAV<b>LER</b></a>
+  <span>Демо-концепт: товары и продавцы вымышлены</span>
+  <span>© 2026 KRAVLER</span>
 </footer>
 
-<script src="./three.min.js"></script>
+<script src="./app.js"></script>
 <script>
-/* ======================================================
-   3D HERO SCENE (Three.js)
-====================================================== */
-(function(){
-  const container = document.getElementById('scene');
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x07060f, 0.055);
-
-  const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, .1, 100);
-  camera.position.set(0, 0, 11);
-
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setSize(innerWidth, innerHeight);
-  container.appendChild(renderer.domElement);
-
-  /* lights */
-  scene.add(new THREE.AmbientLight(0x8888ff, .35));
-  const l1 = new THREE.PointLight(0x8b5cf6, 2.2, 40); l1.position.set(-8, 5, 6); scene.add(l1);
-  const l2 = new THREE.PointLight(0x22d3ee, 2.0, 40); l2.position.set(8, -4, 6); scene.add(l2);
-  const l3 = new THREE.PointLight(0xf472b6, 1.4, 30); l3.position.set(0, 8, -4); scene.add(l3);
-
-  const floaters = [];
-  function addFloater(mesh, r, speed, yOff){
-    mesh.userData = {angle: Math.random()*Math.PI*2, r, speed, yOff, spin:(Math.random()*.6+.4)*(Math.random()<.5?-1:1)};
-    floaters.push(mesh);
-    scene.add(mesh);
-  }
-
-  /* central crystal */
-  const crystal = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.9, 0),
-    new THREE.MeshPhysicalMaterial({
-      color:0x6d28d9, metalness:.3, roughness:.15,
-      emissive:0x4c1d95, emissiveIntensity:.55,
-      transparent:true, opacity:.92, flatShading:true
-    })
-  );
-  scene.add(crystal);
-  const wire = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(2.25, 0),
-    new THREE.MeshBasicMaterial({color:0x22d3ee, wireframe:true, transparent:true, opacity:.25})
-  );
-  scene.add(wire);
-
-  /* rings around crystal */
-  const ring1 = new THREE.Mesh(
-    new THREE.TorusGeometry(3.4, .035, 12, 90),
-    new THREE.MeshBasicMaterial({color:0x8b5cf6, transparent:true, opacity:.55})
-  );
-  ring1.rotation.x = Math.PI/2.4;
-  scene.add(ring1);
-  const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(4.1, .025, 12, 90),
-    new THREE.MeshBasicMaterial({color:0x22d3ee, transparent:true, opacity:.4})
-  );
-  ring2.rotation.x = Math.PI/1.7; ring2.rotation.y = .5;
-  scene.add(ring2);
-
-  /* gold coins */
-  const coinGeo = new THREE.CylinderGeometry(.42, .42, .1, 28);
-  const coinMat = new THREE.MeshStandardMaterial({color:0xfbbf24, metalness:.9, roughness:.25, emissive:0x78350f, emissiveIntensity:.35});
-  for(let i=0;i<7;i++){
-    const c = new THREE.Mesh(coinGeo, coinMat);
-    c.rotation.x = Math.PI/2 + Math.random();
-    addFloater(c, 4.2+Math.random()*2.6, .22+Math.random()*.18, (Math.random()-.5)*4);
-  }
-
-  /* loot boxes */
-  const boxMat = new THREE.MeshStandardMaterial({color:0x312e81, metalness:.5, roughness:.3, emissive:0x4338ca, emissiveIntensity:.4});
-  for(let i=0;i<5;i++){
-    const s = .5+Math.random()*.45;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(s,s,s), boxMat);
-    addFloater(b, 5+Math.random()*3, .16+Math.random()*.14, (Math.random()-.5)*5);
-  }
-
-  /* small gems */
-  const gemMat = new THREE.MeshPhysicalMaterial({color:0x22d3ee, metalness:.2, roughness:.1, emissive:0x0e7490, emissiveIntensity:.7, flatShading:true});
-  const gemMat2 = new THREE.MeshPhysicalMaterial({color:0xf472b6, metalness:.2, roughness:.1, emissive:0x9d174d, emissiveIntensity:.7, flatShading:true});
-  for(let i=0;i<8;i++){
-    const g = new THREE.Mesh(new THREE.OctahedronGeometry(.32+Math.random()*.3, 0), Math.random()<.5?gemMat:gemMat2);
-    addFloater(g, 3.4+Math.random()*4, .28+Math.random()*.22, (Math.random()-.5)*5.5);
-  }
-
-  /* particle field */
-  const pCount = 900;
-  const pos = new Float32Array(pCount*3);
-  for(let i=0;i<pCount;i++){
-    pos[i*3]   = (Math.random()-.5)*46;
-    pos[i*3+1] = (Math.random()-.5)*30;
-    pos[i*3+2] = (Math.random()-.5)*30 - 4;
-  }
-  const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const stars = new THREE.Points(pGeo, new THREE.PointsMaterial({color:0x9d98ff, size:.055, transparent:true, opacity:.8}));
-  scene.add(stars);
-
-  /* interaction */
-  let mx = 0, my = 0;
-  addEventListener('pointermove', e=>{
-    mx = (e.clientX/innerWidth - .5);
-    my = (e.clientY/innerHeight - .5);
-  });
-  addEventListener('resize', ()=>{
-    camera.aspect = innerWidth/innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
-  });
-
-  const clock = new THREE.Clock();
-  function tick(){
-    const t = clock.getElapsedTime();
-
-    crystal.rotation.y = t*.35;
-    crystal.rotation.x = Math.sin(t*.4)*.25;
-    crystal.position.y = Math.sin(t*.8)*.25;
-    wire.rotation.y = -t*.22;
-    wire.rotation.z = t*.12;
-    wire.position.y = crystal.position.y;
-
-    ring1.rotation.z = t*.3;
-    ring2.rotation.z = -t*.22;
-
-    for(const f of floaters){
-      const u = f.userData;
-      u.angle += u.speed*.008;
-      f.position.set(
-        Math.cos(u.angle)*u.r,
-        u.yOff + Math.sin(t*.7 + u.r)*0.5,
-        Math.sin(u.angle)*u.r*.6 - 1
-      );
-      f.rotation.x += .008*u.spin;
-      f.rotation.y += .011*u.spin;
-    }
-
-    stars.rotation.y = t*.015;
-
-    /* scroll: camera pulls back, scene sinks */
-    const sc = Math.min(scrollY/innerHeight, 1.4);
-    camera.position.z = 11 + sc*5;
-    camera.position.y = -sc*3;
-
-    /* mouse parallax */
-    camera.position.x += (mx*2.4 - camera.position.x)*.05;
-    camera.position.y += (-my*1.6 - sc*3 - camera.position.y)*.05;
-    camera.lookAt(0, 0, 0);
-
-    renderer.render(scene, camera);
-    requestAnimationFrame(tick);
-  }
-  tick();
-})();
-
-/* ======================================================
-   3D GAMES CAROUSEL
-====================================================== */
-(function(){
-  const games = [
-    {n:'CS2',            e:'🔫', o:'34 120 лотов', g:'linear-gradient(160deg,#f97316,#7c2d12)'},
-    {n:'Dota 2',         e:'🛡️', o:'21 480 лотов', g:'linear-gradient(160deg,#dc2626,#450a0a)'},
-    {n:'Fortnite',       e:'🪂', o:'18 903 лота',  g:'linear-gradient(160deg,#a855f7,#312e81)'},
-    {n:'Genshin Impact', e:'⚡', o:'27 651 лот',   g:'linear-gradient(160deg,#38bdf8,#1e3a8a)'},
-    {n:'Valorant',       e:'🎯', o:'15 208 лотов', g:'linear-gradient(160deg,#fb7185,#4c0519)'},
-    {n:'Minecraft',      e:'⛏️', o:'12 745 лотов', g:'linear-gradient(160deg,#4ade80,#14532d)'},
-    {n:'Roblox',         e:'🧱', o:'31 022 лота',  g:'linear-gradient(160deg,#94a3b8,#1e293b)'},
-    {n:'Brawl Stars',    e:'⭐', o:'19 384 лота',  g:'linear-gradient(160deg,#facc15,#713f12)'},
-  ];
-  const carousel = document.getElementById('carousel');
-  const R = 380;
-  games.forEach((g,i)=>{
-    const d = document.createElement('div');
-    d.className = 'game-card';
-    d.style.background = g.g;
-    d.style.transform = `rotateY(${i*360/games.length}deg) translateZ(${R}px)`;
-    d.innerHTML = `<div class="emoji">${g.e}</div><b>${g.n}</b><span>${g.o}</span>`;
-    carousel.appendChild(d);
-  });
-})();
-
-/* ======================================================
-   OFFERS
-====================================================== */
+/* ---------- offers data ---------- */
 (function(){
   const offers = [
-    {t:'Аккаунт CS2 | 5000+ часов | Нож Karambit Fade', e:'🔪', s:'ProTrader', r:'4.98', p:'24 900 ₽', tag:'ТОП', g:'linear-gradient(140deg,#7c3aed,#1e1b4b)'},
-    {t:'Genshin Impact | AR 58 | 14 легендарных персонажей', e:'⚡', s:'GenshinGod', r:'4.95', p:'11 500 ₽', tag:'ХИТ', g:'linear-gradient(140deg,#0ea5e9,#0c1e3e)'},
-    {t:'1000 V-Bucks Fortnite | Моментально на аккаунт', e:'💰', s:'FastBucks', r:'5.00', p:'590 ₽', tag:'-20%', g:'linear-gradient(140deg,#a855f7,#3b0764)'},
-    {t:'Буст CS2 Premier | 15 000 → 20 000 elo', e:'🚀', s:'BoostKing', r:'4.92', p:'3 400 ₽', tag:'', g:'linear-gradient(140deg,#f97316,#431407)'},
-    {t:'Гемы Brawl Stars | 2000 гемов | Официальный донат', e:'💎', s:'GemStore', r:'4.99', p:'4 190 ₽', tag:'ХИТ', g:'linear-gradient(140deg,#eab308,#422006)'},
-    {t:'Ключ Steam | Cyberpunk 2077 Ultimate | RU/CIS', e:'🔑', s:'KeyMaster', r:'4.97', p:'1 890 ₽', tag:'-35%', g:'linear-gradient(140deg,#ef4444,#450a0a)'},
-    {t:'Робуксы Roblox | 1700 R$ | Передача через группу', e:'🧱', s:'RobloxShop', r:'4.94', p:'1 250 ₽', tag:'', g:'linear-gradient(140deg,#64748b,#0f172a)'},
-    {t:'Аркана Dota 2 | Phantom Assassin | Обмен сразу', e:'🗡️', s:'ArcanaHub', r:'4.96', p:'2 750 ₽', tag:'ТОП', g:'linear-gradient(140deg,#dc2626,#27272a)'},
+    {g:'CS2', t:'Аккаунт 5000+ часов, нож Karambit Fade, 12 медалей', s:'ProTrader', r:'4.98', p:'24 900 ₽', tag:'топ'},
+    {g:'Genshin Impact', t:'AR 58, 14 легендарных персонажей, гарант передачи', s:'GenshinGod', r:'4.95', p:'11 500 ₽', tag:'хит'},
+    {g:'Fortnite', t:'1000 V-Bucks — зачисление на аккаунт за 5 минут', s:'FastBucks', r:'5.00', p:'590 ₽', tag:'-20%', cold:true},
+    {g:'CS2', t:'Буст Premier с 15 000 до 20 000 elo, стрим процесса', s:'BoostKing', r:'4.92', p:'3 400 ₽'},
+    {g:'Brawl Stars', t:'2000 гемов официальным донатом через Supercell ID', s:'GemStore', r:'4.99', p:'4 190 ₽', tag:'хит'},
+    {g:'Steam', t:'Ключ Cyberpunk 2077 Ultimate Edition, регион RU/CIS', s:'KeyMaster', r:'4.97', p:'1 890 ₽', tag:'-35%', cold:true},
+    {g:'Roblox', t:'1700 робуксов передачей через группу, без входа в аккаунт', s:'RobloxShop', r:'4.94', p:'1 250 ₽'},
+    {g:'Dota 2', t:'Аркана Phantom Assassin — обмен сразу после оплаты', s:'ArcanaHub', r:'4.96', p:'2 750 ₽', tag:'топ'},
   ];
   const grid = document.getElementById('offerGrid');
   offers.forEach(o=>{
     const d = document.createElement('div');
     d.className = 'offer reveal';
-    d.setAttribute('data-tilt','');
     d.innerHTML = `
-      <div class="cover" style="background:${o.g}">
-        ${o.tag?`<span class="tag">${o.tag}</span>`:''}
-        <span class="emoji">${o.e}</span>
-      </div>
-      <div class="body">
-        <h4>${o.t}</h4>
-        <div class="seller">
-          <span class="ava">${o.s[0]}</span> ${o.s}
-          <span class="rate">★ ${o.r}</span>
-          <span class="online"></span> онлайн
-        </div>
-        <div class="foot">
-          <span class="price">${o.p}</span>
-          <button class="buy">Купить</button>
-        </div>
-      </div>`;
+      <div class="top"><span class="game">${o.g}</span>${o.tag?`<span class="tag${o.cold?' cold':''}">${o.tag}</span>`:''}</div>
+      <h4>${o.t}</h4>
+      <div class="seller"><span class="dot"></span>${o.s}<span class="star">★ ${o.r}</span></div>
+      <div class="foot"><span class="price">${o.p}</span><button>Купить</button></div>`;
     grid.appendChild(d);
   });
 })();
 
-/* ======================================================
-   3D TILT ON CARDS
-====================================================== */
+/* ---------- reveal + counters ---------- */
 (function(){
-  document.addEventListener('pointermove', e=>{
-    const el = e.target.closest('[data-tilt]');
-    document.querySelectorAll('[data-tilt]').forEach(c=>{
-      if(c!==el){c.style.transform='';}
-    });
-    if(!el) return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left)/r.width - .5;
-    const y = (e.clientY - r.top)/r.height - .5;
-    el.style.transform = `perspective(800px) rotateY(${x*14}deg) rotateX(${-y*14}deg) translateY(-4px) scale(1.02)`;
-    el.style.setProperty('--mx', `${(x+.5)*100}%`);
-    el.style.setProperty('--my', `${(y+.5)*100}%`);
-  });
-  document.addEventListener('pointerleave', ()=>{
-    document.querySelectorAll('[data-tilt]').forEach(c=>c.style.transform='');
-  }, true);
-})();
-
-/* ======================================================
-   SCROLL REVEAL + COUNTERS
-====================================================== */
-(function(){
-  const io = new IntersectionObserver(entries=>{
-    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('on'); io.unobserve(en.target); } });
-  }, {threshold:.12});
+  const io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('on'); io.unobserve(e.target); } });
+  },{threshold:.15});
   document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
-  const fmt = n => n.toLocaleString('ru-RU');
+  const fmt = n=>n.toLocaleString('ru-RU');
   document.querySelectorAll('[data-count]').forEach(el=>{
-    const target = +el.dataset.count;
-    const t0 = performance.now(), dur = 2200;
+    const target = +el.dataset.count, t0 = performance.now(), dur = 2200;
     (function step(now){
-      const k = Math.min((now-t0)/dur, 1);
+      const k = Math.min((now-t0)/dur,1);
       el.textContent = fmt(Math.round(target*(1-Math.pow(1-k,3))));
       if(k<1) requestAnimationFrame(step);
     })(t0);
